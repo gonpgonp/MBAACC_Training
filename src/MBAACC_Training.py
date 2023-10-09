@@ -12,27 +12,39 @@ cfg = cfg_cc
 sub = sub_cc
 
 sub.ex_cmd_enable()
-os.system('mode con: cols=166 lines=10')
+os.system('mode con: cols=164 lines=12')
 os.system('cls')
-os.system('title MBAACC_Training 1.2.7')
+os.system('title MBAACC Training')
 print('\x1b[1;1H' + '\x1b[?25l')
 windll.winmm.timeBeginPeriod(1)  # タイマー精度を1msec単位にする
 
 # 変数初期化
 save_flag = 0
+save_flag2 = 0
 flag1 = 0
+ispaused = 0
 start_time = time.time()
+save1 = 0
+save2 = 0
 
+framestep = 0
+    
 
 def function_key():
 
     global flag1
     global save_flag
-
+    global save_flag2
+    global ispaused
+    global framestep
+    global save1
+    global save2
+    
     # セーブデータリセット
     if keyboard.is_pressed("F1"):
         if flag1 == 0:
             save_flag = 0
+            save_flag2 = 0
         elif flag1 == 100:
             sub.MAX_Damage_ini()
         flag1 += 1
@@ -46,24 +58,45 @@ def function_key():
             flag1 = 1
 
     elif cfg.fn2_key.num == 1 or cfg.fn2_key.num == 3:
+        save2 = 0
+        save1 = 1
+        ispaused = 0
         if flag1 == 0:
             flag1 = 1
             if cfg.dummy_st.num == 5 or cfg.dummy_st.num == -1:
                 sub.situationReset()
             sub.w_mem(ad.COMB_AFTER_TIMER_AD, b'\xFF')
+    
+    elif keyboard.is_pressed("F6") and save_flag == 1:
+        save2 = 0
+        save1 = 1
+        sub.situationReset()
+    
+    elif keyboard.is_pressed("F7"):
+        if flag1 == 0:
+            sub.situationMem2()
+            sub.pause()
+
+            save_flag2 = 1
+            flag1 = 1
+    
+    elif keyboard.is_pressed("F8") and save_flag2 == 1:
+        save1 = 0
+        save2 = 1
+        sub.situationReset()
 
     # デバッグ表示
-    elif (keyboard.is_pressed("9")) and (keyboard.is_pressed("0")):
+    elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
         if cfg.debug_flag == 0:
             cfg.debug_flag = 1
-            os.system('mode con: cols=166 lines=15')
+            os.system('mode con: cols=164 lines=17')
 
         elif cfg.debug_flag == 1:
             cfg.debug_flag = 0
-            os.system('mode con: cols=166 lines=10')
+            os.system('mode con: cols=164 lines=12')
 
         time.sleep(0.3)
-
+    
     elif flag1 >= 1:
         flag1 = 0
         sub.play()
@@ -108,8 +141,13 @@ while 1:
 
         if cfg.f_timer == 1:
             sub.bar_ini()
-
-            if save_flag == 1:
+            
+            if save_flag2 == 1 and save2 == 1:
+                sub.situationWrit2()
+            elif save_flag == 1 and save1 == 1:
                 # 状況再現
                 sub.situationWrit()
+            elif save_flag != 0:
+                sub.situationWrit()
+            
     sub.view()

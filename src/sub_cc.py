@@ -6,6 +6,7 @@ import copy
 import ctypes
 import keyboard
 import psutil
+import math
 
 import cfg_cc
 import ad_cc
@@ -26,7 +27,6 @@ Module32First = windll.kernel32.Module32First
 CreateToolhelp32Snapshot = windll.kernel32.CreateToolhelp32Snapshot
 CloseHandle = windll.kernel32.CloseHandle
 sizeof = ctypes.sizeof
-
 
 class MODULEENTRY32(ctypes.Structure):
     _fields_ = [
@@ -92,6 +92,10 @@ def b_unpack(d_obj):
         return unpack('l', d_obj.raw)[0]
 
 
+def f_unpack(d_obj):
+    return unpack('f', d_obj.raw)[0]
+
+
 def r_mem(ad, b_obj):
     ReadMem(cfg.h_pro, ad + cfg.base_ad, b_obj, len(b_obj), None)
     return b_unpack(b_obj)
@@ -100,6 +104,11 @@ def r_mem(ad, b_obj):
 def r_mem_2(ad, b_obj):
     ReadMem(cfg.h_pro, ad, b_obj, len(b_obj), None)
     return b_unpack(b_obj)
+
+
+def r_mem_f(ad, b_obj):
+    ReadMem(cfg.h_pro, ad + cfg.base_ad, b_obj, len(b_obj), None)
+    return f_unpack(b_obj)
 
 
 def w_mem(ad, b_obj):
@@ -112,6 +121,10 @@ def para_get(obj):
 
 def para_get_2(obj):
     obj.num = r_mem_2(obj.ad, obj.b_dat)
+
+
+def para_get_f(obj):
+    obj.num  = r_mem_f(obj.ad, obj.b_dat)
 
 
 def para_set(obj):
@@ -141,6 +154,13 @@ def ex_cmd_enable():
 
 def situationCheck():
     # 状況チェック
+    para_get(cfg.directional_input)
+    para_get(cfg.a_input)
+    para_get(cfg.b_input)
+    para_get(cfg.c_input)
+    para_get(cfg.d_input)
+    para_get(cfg.e_input)
+    para_get(cfg.ab_input)
     para_get(cfg.fn1_key)
     para_get(cfg.fn2_key)
     para_get(cfg.dummy_st)
@@ -152,9 +172,15 @@ def situationCheck():
             n.motion_type_old = n.motion_type.num
         para_get(n.motion_type)
         para_get(n.motion)
+        para_get(n.pframe)
         para_get(n.x_posi)
         para_get(n.y_posi1)
         para_get(n.y_posi2)
+        para_get(n.x_spd)
+        para_get(n.x_acc)
+        para_get(n.momentum)
+        para_get(n.y_spd)
+        para_get(n.y_acc)
         para_get(n.air_flag)
         para_get(n.circuit)
         para_get(n.atk)
@@ -164,6 +190,12 @@ def situationCheck():
         para_get(n.anten_stop)
         para_get(n.hitstop)
         para_get(n.stop)
+        para_get(n.hitstun)
+        para_get(n.untech)
+        para_get(n.untechend)
+        para_get(n.chstate)
+        para_get_f(n.grav)
+        para_get(n.utpen)
         n.hit.num = 0
         para_get(n.throw_inv)
         para_get(n.atk_st_pointer)
@@ -214,6 +246,25 @@ def situationMem():
     para_get(save.contl_flag)
     para_get(save.contl_flag2)
 
+def situationMem2():
+
+    # 状況を記憶
+    save.P_info2 = copy.deepcopy(cfg.P_info)
+
+    for n in save.P_info2:
+        para_get(n.dmp)
+
+    para_get(save.obj_2)
+    para_get(save.stop_situation_2)
+    para_get(save.stop_2)
+    para_get(save.damage_2)
+    para_get(save.damage2_2)
+    para_get(save.cam1_x_2)
+    para_get(save.cam2_x_2)
+    para_get(save.cam1_y_2)
+    para_get(save.cam2_y_2)
+    para_get(save.contl_flag_2)
+    para_get(save.contl_flag2_2)
 
 def situationWrit():
     # 状況を再現
@@ -231,6 +282,23 @@ def situationWrit():
     para_set(save.cam2_y)
     para_set(save.contl_flag)
     para_set(save.contl_flag2)
+    
+def situationWrit2():
+    # 状況を再現
+    for n in save.P_info2:
+        para_set(n.dmp)
+
+    para_set(save.obj_2)
+    para_set(save.stop_situation_2)
+    para_set(save.stop_2)
+    para_set(save.damage_2)
+    para_set(save.damage2_2)
+    para_set(save.cam1_x_2)
+    para_set(save.cam2_x_2)
+    para_set(save.cam1_y_2)
+    para_set(save.cam2_y_2)
+    para_set(save.contl_flag_2)
+    para_set(save.contl_flag2_2)
 
 
 def view_st():
@@ -246,7 +314,8 @@ def view_st():
 
     # キャラの状況推移表示
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or cfg.p1.hit.num != 0 or
-            cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or cfg.p2.hit.num != 0):
+            cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or cfg.p2.hit.num != 0) or (
+            cfg.debug_flag == 1 and cfg.directional_input.num != 0):
 
         cfg.reset_flag = 0
         cfg.bar_flag = 1
@@ -268,7 +337,7 @@ def view_st():
 
         # 攻撃判定持続計算
         for n in cfg.p_info:
-            if n.atk.num != 0 and cfg.anten == 0 and cfg.hitstop == 0:  # 攻撃判定を出しているとき
+            if n.atk.num != 0 and cfg.anten == 0 and n.hitstop.num == 0:  # 攻撃判定を出しているとき
                 n.active += 1
             elif n.atk.num == 0 and cfg.anten == 0 and cfg.hitstop <= 1:  # 攻撃判定を出してないとき
                 n.active = 0
@@ -351,15 +420,16 @@ def determineReset():
 def stop_flame_calc():
 
     # 暗転判定処理
-    if cfg.stop.num != 0:
+    if cfg.stop.num != 0 and cfg.debug_flag == 0:
         cfg.anten += 1
-    elif cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
-        cfg.anten += 1
+    elif (cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0) and cfg.debug_flag == 0:
+        #cfg.anten += 1
+        cfg.anten = 0
     else:
         cfg.anten = 0
 
     # ヒットストップ処理
-    if (cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0):
+    if (cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0 and cfg.debug_flag == 0):
         cfg.hitstop += 1
     elif (cfg.p1.hitstop.num == 0 or cfg.p2.hitstop.num == 0):
         cfg.hitstop = 0
@@ -387,18 +457,23 @@ def bar_add():
 
     atk = get_font((255, 255, 255), (255, 0, 0))
     mot = get_font((255, 255, 255), (65, 200, 0))
-    grd_stun = get_font((255, 255, 255), (170, 170, 170))
-    hit_stun = get_font((255, 255, 255), (170, 170, 170))
+    grd_stun = get_font((255, 255, 255), (140, 140, 140))
+    hit_stun = get_font((255, 255, 255), (140, 140, 140))
     fre = get_font((92, 92, 92), (0, 0, 0))
     jmp = get_font((177, 177, 177), (241, 224, 132))
     seeld = get_font((255, 255, 255), (145, 194, 255))
-    inv = get_font((200, 200, 200), (255, 255, 255))
+    inv = get_font((180, 180, 180), (255, 255, 255))
     inv_atk = get_font((255, 255, 255), (255, 160, 160))
     adv = get_font((255, 255, 255), (0, 0, 0))
     bunker = get_font((255, 255, 255), (225, 184, 0))
     bunker_atk = get_font((255, 255, 255), (225, 102, 0))
     air = get_font((125, 127, 168), (125, 127, 168))
     throw_number = [350]  # 投げやられ
+    a_font = get_font((255, 143, 169), (170, 27, 58))
+    b_font = get_font((255, 255, 137), (169, 91, 7))
+    c_font = get_font((143, 255, 195), (18, 132, 62))
+    d_font = get_font((137, 255, 255), (21, 66, 161))
+    freeze = get_font((255, 255, 255), (60, 60, 60))
 
     hit_number = [
         26,  # 立吹っ飛び
@@ -438,11 +513,22 @@ def bar_add():
             for list_a in hit_number:  # ヒット中
                 if n.motion_type.num == list_a:
                     font = hit_stun
+                    if n.air_flag.num == 0 and n.y_posi1.num == 0 and n.y_posi2.num == 0:  # 地上にいる場合
+                        if (n.hitstun.num - 1) > 0:
+                            num = str(n.hitstun.num - 1)
+                    elif n.air_flag.num == 150 or n.y_posi1.num != 0 or n.y_posi2.num != 0:  # 空中にいる場合:
+                        if (n.untechend.num - n.untech.num) > 0:
+                            num = str(n.untechend.num - n.untech.num)
                     break
 
             for list_a in grd_number:  # ガード中
                 if n.motion_type.num == list_a:
                     font = grd_stun
+                    if n.air_flag.num == 0 and n.y_posi1.num == 0 and n.y_posi2.num == 0:  # 地上にいる場合
+                            if (n.hitstun.num - 1) > 0:
+                                num = str(n.hitstun.num - 1)
+                            else:
+                                num = "0"
                     break
 
         elif n.motion.num == 0:
@@ -465,15 +551,19 @@ def bar_add():
 
         elif n.atk_st.num == 1 or n.atk_st.num == 0 or n.step_inv.num != 0:  # 無敵中
             font = inv
-
+        
+        if cfg.stop.num != 0 and cfg.debug_flag == 1:
+            font = freeze
+        
         n.barlist_1[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
 
         font = ""
         num = ""
-        if n.air_flag.num == 0 and n.y_posi1.num == 0 and n.y_posi2.num == 0:  # 地上にいる場合
-            num = ""
-        elif n.air_flag.num == 150 or n.y_posi1.num != 0 or n.y_posi2.num != 0:  # 空中にいる場合:
+        
+        if n.air_flag.num == 150 or n.y_posi1.num != 0 or n.y_posi2.num != 0:  # 空中にいる場合:
             num = "^"
+        elif cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
+            num = "*"
 
         if n.atk.num != 0:  # 攻撃判定を出しているとき
             font = atk
@@ -481,13 +571,71 @@ def bar_add():
             if n.air_flag.num == 150 or n.y_posi1.num != 0 or n.y_posi2.num != 0:  # 空中にいる場合:
                 font += "\x1b[4m"
 
+        if cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
+            font += "\x1b[38;2;160;200;200m"
+
         n.barlist_2[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        
+        #num = str(n.motion_type.num)
+        bar3 = ""
+        button_pressed = 0
+        if cfg.a_input.num > 0 or cfg.b_input.num > 0 or cfg.c_input.num > 0 or cfg.d_input.num > 0 or cfg.e_input.num > 0 or cfg.ab_input.num > 0:
+            button_pressed = 1
+        else:
+            button_pressed = 0
+        
+        if cfg.e_input.num > 0 and cfg.ab_input.num > 0:
+            num = "EF"
+        elif cfg.e_input.num > 0:
+            num = "E "
+        elif cfg.ab_input.num > 0:
+            num = " F"
+        else:
+            num = "  "
+        
+        if cfg.a_input.num > 0:
+            font = a_font
+        elif button_pressed == 1:
+            font = hit_stun
+        else:
+            font = DEF
+        bar3 += font + num[0] + DEF
+        
+        if cfg.b_input.num > 0:
+            font = b_font
+        elif button_pressed == 1:
+            font = hit_stun
+        else:
+            font = DEF
+        bar3 += font + num[1] + DEF
+        n.barlist_3[cfg.bar_num] = bar3
 
-        num = str(n.motion_type.num)
-        n.barlist_3[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
-
-        num = str(n.rigid_f.num)
-        n.barlist_4[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        #num = str(n.rigid_f.num)
+        bar4 = ""
+        num = cfg.directional_input.num
+        if cfg.directional_input.num < 0:
+            num += 128
+        num = str(num).rjust(2, " ")[-2:]
+        if num == " 0":
+            num = " ."
+        
+        if cfg.c_input.num > 0:
+            font = c_font
+        elif button_pressed == 1:
+            font = hit_stun
+        else:
+            font = DEF
+        bar4 += font + num[0] + DEF
+        font = DEF
+        
+        if cfg.d_input.num > 0:
+            font = d_font
+        elif button_pressed == 1:
+            font = hit_stun
+        else:
+            font = DEF
+        bar4 += font + num[1] + DEF
+        n.barlist_4[cfg.bar_num] = bar4
 
 
 def bar_ini():
@@ -516,24 +664,70 @@ def bar_ini():
 
         cfg.st_barlist[n] = ""
 
-
 def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
-    x_p1 = str(cfg.p1.x_posi.num).rjust(8, " ")
-    x_p2 = str(cfg.p2.x_posi.num).rjust(8, " ")
+    
+    x_p1 = str(cfg.p1.x_posi.num).rjust(6, " ")
+    x_p2 = str(cfg.p2.x_posi.num).rjust(6, " ")
+    xp_p1 = str(math.floor(cfg.p1.x_posi.num/128)).rjust(6, " ")
+    xp_p2 = str(math.floor(cfg.p2.x_posi.num/128)).rjust(6, " ")
+    xspd_p1_math = cfg.p1.x_spd.num
+    xspd_p2_math = cfg.p2.x_spd.num
+    xspd_p1 = str(xspd_p1_math).rjust(6, " ")
+    xspd_p2 = str(xspd_p2_math).rjust(6, " ")
+    xacc_p1 = str(cfg.p1.x_acc.num).rjust(6, " ")
+    xacc_p2 = str(cfg.p2.x_acc.num).rjust(6, " ")
+    
+    momentum_p1_math = cfg.p1.momentum.num
+    momentum_p2_math = cfg.p2.momentum.num
+    xspdfinal_p1 = str(momentum_p1_math + xspd_p1_math).rjust(6, " ")
+    xspdfinal_p2 = str(momentum_p2_math + xspd_p2_math).rjust(6, " ")
 
-    zen_P1 = str(cfg.p1.zen).rjust(3, " ")
-    zen_P2 = str(cfg.p2.zen).rjust(3, " ")
+    y_p1 = str(cfg.p1.y_posi1.num).rjust(6, " ")
+    y_p2 = str(cfg.p2.y_posi1.num).rjust(6, " ")    
+    yp_p1 = str(math.floor(cfg.p1.y_posi1.num/128)).rjust(6, " ")
+    yp_p2 = str(math.floor(cfg.p2.y_posi1.num/128)).rjust(6, " ")
+    yspd_p1 = str(cfg.p1.y_spd.num).rjust(6, " ")
+    yspd_p2 = str(cfg.p2.y_spd.num).rjust(6, " ")
+    yacc_p1 = str(cfg.p1.y_acc.num).rjust(6, " ")
+    yacc_p2 = str(cfg.p2.y_acc.num).rjust(6, " ")
+    
+    pat1 = str(cfg.p1.motion_type.num).rjust(6, " ")
+    pf1 = str(cfg.p1.pframe.num).rjust(8, " ")
+    pat2 = str(cfg.p2.motion_type.num).rjust(6, " ")
+    pf2 = str(cfg.p2.pframe.num).rjust(8, " ")
+    
+    ch1 = ""
+    ch2 = ""
+    
+    if(cfg.p1.chstate.num == 2):
+        ch1 = "Low".rjust(6, " ")
+    elif(cfg.p1.chstate.num == 1):
+        ch1 = "High".rjust(6, " ")
+    else:
+        ch1 = "None".rjust(6, " ")
 
-    circuit_p1 = str('{:.02f}'.format(cfg.p1.circuit.num / 100)).rjust(7, " ")
-    circuit_p2 = str('{:.02f}'.format(cfg.p2.circuit.num / 100)).rjust(7, " ")
+    if(cfg.p2.chstate.num == 2):
+        ch2 = "Low".rjust(6, " ")
+    elif(cfg.p2.chstate.num == 1):
+        ch2 = "High".rjust(6, " ")
+    else:
+        ch2 = "None".rjust(6, " ")
 
-    act_P1 = str(cfg.p1.act).rjust(3, " ")
-    act_P2 = str(cfg.p2.act).rjust(3, " ")
+    zen_P1 = str(cfg.p1.zen).rjust(6, " ")
+    zen_P2 = str(cfg.p2.zen).rjust(6, " ")
 
-    advantage_f = str(cfg.advantage_f).rjust(7, " ")
+    circuit_p1 = str(cfg.p1.circuit.num).rjust(6, " ")
+    circuit_p2 = str(cfg.p2.circuit.num).rjust(6, " ")
+
+    act_P1 = str(cfg.p1.act).rjust(7, " ")
+    act_P2 = str(cfg.p2.act).rjust(7, " ")
+
+    advantage_f = str(cfg.advantage_f).rjust(6, " ")
 
     kyori = cfg.p1.x_posi.num - cfg.p2.x_posi.num
+    trange = cfg.p1.x_posi.num - cfg.p2.x_posi.num
+    prange = math.floor(cfg.p1.x_posi.num/128) - math.floor(cfg.p2.x_posi.num/128)
 
     for n in cfg.p_info:
         n.Bar_1 = ""
@@ -562,13 +756,23 @@ def view():
         kyori = kyori * -1
     kyori = kyori / (21845)
     kyori = str(kyori)[:5]
+    
+    if trange < 0:
+        trange = trange * -1
+    trange = str(trange)
+    
+    if prange < 0:
+        prange = prange * -1
+    prange = str(prange)
 
     state_str = '\x1b[1;1H' + '\x1b[?25l'
 
-    state_str += f'1P|Position{x_p1}'
-    state_str += f' FirstActive{act_P1}'
-    state_str += f' Overall{zen_P1}'
-    state_str += f' Circuit{circuit_p1}%'
+    state_str += f'1P|({x_p1},'
+    state_str += f' {y_p1})'
+    state_str += f' |Pattern{pat1}'
+    state_str += f' |Frame{pf1}'
+    state_str += f' |Counter{ch1}'
+    state_str += f' |Circuit{circuit_p1}'
 
     if keyboard.is_pressed("F1"):
         f1 = '  \x1b[007m' + '[F1]Reset' + '\x1b[0m'
@@ -580,18 +784,73 @@ def view():
     else:
         f2 = '  [F2]Save state'
 
-    state_str += '   ' + f1 + f2 + END
+    if keyboard.is_pressed("F6"):
+        f6 = '  \x1b[007m' + '[F6]Load state' + '\x1b[0m'
+    else:
+        f6 = '  [F6]Load state'
 
-    state_str += '2P|Position' + x_p2
-    state_str += ' FirstActive' + act_P2
-    state_str += ' Overall' + zen_P2
-    state_str += ' Circuit' + circuit_p2 + '%'
+    if keyboard.is_pressed("F7"):
+        f7 = '  \x1b[007m' + '[F7]Save state 2' + '\x1b[0m'
+    else:
+        f7 = '  [F7]Save state 2'
+
+    if keyboard.is_pressed("F8"):
+        f8 = '  \x1b[007m' + '[F8]Load state 2' + '\x1b[0m'
+    else:
+        f8 = '  [F8]Load state 2'
+
+    state_str += '   ' + f1 + f2 + f6 + f7 + f8 + END
+    
+    state_str += "\x1b[4m"
+    state_str += f'  |({xp_p1},'
+    state_str += f' {yp_p1})'
+    state_str += f' |X-Speed{xspdfinal_p1}'
+    state_str += f' |X-Accel{xacc_p1}'
+    state_str += f' |Y-Speed{yspd_p1}'
+    state_str += f' |Y-Accel{yacc_p1}'
+    state_str += "\x1b[4m"
+    state_str += END
+
+    state_str += f'2P|({x_p2},'
+    state_str += f' {y_p2})'
+    state_str += f' |Pattern{pat2}'
+    state_str += f' |Frame{pf2}'
+    state_str += f' |Counter{ch2}'
+    state_str += f' |Circuit{circuit_p2}'
+    
+    if keyboard.is_pressed(",") and keyboard.is_pressed("."):
+        debughotkeys = '  \x1b[007m' + '[,+.]Toggle Debug' + '\x1b[0m'
+    else:
+        debughotkeys = '  [,+.]Toggle Extra Info'
+    
+    state_str += '   ' + debughotkeys + END
+    
+    state_str += "\x1b[4m"
+    state_str += f'  |({xp_p2},'
+    state_str += f' {yp_p2})'
+    state_str += f' |X-Speed{xspdfinal_p2}'
+    state_str += f' |X-Accel{xacc_p2}'
+    state_str += f' |Y-Speed{yspd_p2}'
+    state_str += f' |Y-Accel{yacc_p2}'
+    state_str += "\x1b[4m"
     state_str += END
 
     state_str += '  |Advantage' + advantage_f
-    state_str += '  Range ' + kyori + 'M' + END
+    state_str += '  Range ' + trange.rjust(7, " ")
+    state_str += ' P-Range ' + prange.rjust(5, " ") + END
 
-    state_str += '  | 1 2 3 4 5 6 7 8 91011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980' + END
+    tempstr = "\x1b[4m"
+    for i in range(1,81):
+        if i < 10:
+            tempstr += " "
+        tempstr += str(i)
+        if i % 2 == 1:
+            tempstr += "\x1b[4;48;5;238m"
+        else:
+            tempstr += "\x1b[0;4m"
+
+
+    state_str += '  |' + tempstr + END
     state_str += '1P|' + cfg.p1.Bar_1 + END
     state_str += '  |' + cfg.p1.Bar_2 + END
     state_str += '2P|' + cfg.p2.Bar_1 + END
@@ -605,33 +864,60 @@ def view():
 
 def degug_view(state_str):
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
+    tempstr = "\x1b[4m"
+    for i in range(1,81):
+        if i < 10:
+            tempstr += " "
+        tempstr += str(i)
+        if i % 2 == 1:
+            tempstr += "\x1b[4;48;5;238m"
+        else:
+            tempstr += "\x1b[0;4m"
     # os.system('mode con: cols=166 lines=15')
-    debug_str_p1 = "f_timer " + str(cfg.f_timer).rjust(7, " ")
-    debug_str_p2 = "bar_num " + str(cfg.bar_num).rjust(7, " ")
-
-    debug_str_p1 += "motion_type " + str(cfg.p1.motion_type.num).rjust(7, " ")
-    debug_str_p2 += "motion_type " + str(cfg.p2.motion_type.num).rjust(7, " ")
-    debug_str_p1 += " motion " + str(cfg.p1.motion.num).rjust(7, " ")
-    debug_str_p2 += " motion " + str(cfg.p2.motion.num).rjust(7, " ")
-    debug_str_p1 += " anten_stop " + str(cfg.p1.anten_stop.num).rjust(7, " ")
-    debug_str_p2 += " anten_stop " + str(cfg.p2.anten_stop.num).rjust(7, " ")
-    debug_str_p1 += " hitstop " + str(cfg.p1.hitstop.num).rjust(7, " ")
-    debug_str_p2 += " hitstop " + str(cfg.p2.hitstop.num).rjust(7, " ")
-    debug_str_p1 += " anten " + str(cfg.anten).rjust(7, " ")
-    debug_str_p1 += " stop " + str(cfg.stop.num).rjust(7, " ")
-    debug_str_p1 += " y_posi " + str(cfg.p1.y_posi1.num).rjust(7, " ")
-    debug_str_p1 += " y_posi " + str(cfg.p2.y_posi1.num).rjust(7, " ")
-    debug_str_p1 += " y_posi " + str(cfg.p1.y_posi2.num).rjust(7, " ")
-    debug_str_p1 += " y_posi " + str(cfg.p2.y_posi2.num).rjust(7, " ")
-    debug_str_p1 += " tag_flag " + str(cfg.p1.tag_flag.num).rjust(7, " ")
-    debug_str_p1 += " tag_flag " + str(cfg.p2.tag_flag.num).rjust(7, " ")
-
+    debug_str_3 = '  |' + tempstr
+    #debug_str_3 = "  |frame timer" + str(cfg.f_timer).rjust(7, " ")
+    #debug_str_3 += " bar_num " + str(cfg.bar_num).rjust(7, " ")
+    #debug_str_3 += " anten " + str(cfg.anten).rjust(8, " ")
+    #debug_str_3 += " stop " + str(cfg.stop.num).rjust(11, " ")
+    debug_str_p1 = "1P|EX Flash " + str(cfg.p1.anten_stop.num).rjust(7, " ")
+    debug_str_p2 = "2P|EX Flash " + str(cfg.p2.anten_stop.num).rjust(7, " ")
+    debug_str_p1 += " |Hitstop " + str(cfg.p1.hitstop.num).rjust(7, " ")
+    debug_str_p2 += " |Hitstop " + str(cfg.p2.hitstop.num).rjust(7, " ")
+    #debug_str_p1 += " y_posi " + str(cfg.p1.y_posi2.num).rjust(7, " ")
+    #debug_str_p2 += " y_posi " + str(cfg.p2.y_posi2.num).rjust(7, " ")
+    #debug_str_p1 += " |tag_flag " + str(cfg.p1.tag_flag.num).rjust(7, " ")
+    #debug_str_p2 += " |tag_flag " + str(cfg.p2.tag_flag.num).rjust(7, " ")
+    
+    gravity_p1 = cfg.p1.grav.num
+    gravity_p1 = max(0, round((gravity_p1 - 0.072) / 0.008))
+    gravity_p1 -= math.floor(gravity_p1/60)
+    gravity_p1 = math.ceil(gravity_p1/6)
+    #gravity_p1 += cfg.p1.utpen.num
+    grav_hits_p1 = round(cfg.p1.grav.num / 0.008)
+    
+    gravity_p2 = cfg.p2.grav.num
+    gravity_p2 = max(0, round((gravity_p2 - 0.072) / 0.008))
+    gravity_p2 -= math.floor(gravity_p2/60)
+    gravity_p2 = math.ceil(gravity_p2/6)
+    #gravity_p2 += cfg.p2.utpen.num
+    grav_hits_p2 = round(cfg.p2.grav.num / 0.008)
+    
+    debug_str_p1 += (" |Penalty" + str(grav_hits_p1).rjust(3, " ") + 
+                    " (" + str(gravity_p1).rjust(2, " ") + " + " + 
+                    str(cfg.p1.utpen.num).rjust(2, " ") + ")")
+    debug_str_p2 += (" |Penalty" + str(grav_hits_p2).rjust(3, " ") + 
+                    " (" + str(gravity_p2).rjust(2, " ") + " + " + 
+                    str(cfg.p2.utpen.num).rjust(2, " ") + ")")
+    
     # debug_str_p2 += " interval " + str(cfg.interval).rjust(7, " ")
     # debug_str_p2 += " Bar80_flag " + str(cfg.Bar80_flag).rjust(7, " ")
     # debug_str_p1 += "anten_stop.ad " + str(cfg.P_info[0].motion_type.ad).rjust(7, " ")
 
     state_str += debug_str_p1 + END
     state_str += debug_str_p2 + END
+    state_str += "\x1b[4m"
+    state_str += debug_str_3 + END
+    state_str += "\x1b[0m"
     # state_str += '1P|' + cfg.p1.Bar_2 + END
     state_str += '1P|' + cfg.p1.Bar_3 + END
     state_str += '1P|' + cfg.p1.Bar_4 + END
