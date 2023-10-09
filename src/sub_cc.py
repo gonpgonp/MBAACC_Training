@@ -879,8 +879,18 @@ def degug_view(state_str):
     #debug_str_3 += " bar_num " + str(cfg.bar_num).rjust(7, " ")
     #debug_str_3 += " anten " + str(cfg.anten).rjust(8, " ")
     #debug_str_3 += " stop " + str(cfg.stop.num).rjust(11, " ")
-    debug_str_p1 = "1P|EX Flash " + str(cfg.p1.anten_stop.num).rjust(7, " ")
-    debug_str_p2 = "2P|EX Flash " + str(cfg.p2.anten_stop.num).rjust(7, " ")
+    exflash1 = 0
+    if (cfg.p1.anten_stop.num > 0):
+        exflash1 = cfg.p1.anten_stop.num
+    elif (cfg.stop.num > 0):
+        exflash1 = cfg.stop.num
+    exflash2 = 0
+    if (cfg.p2.anten_stop.num > 0):
+        exflash2 = cfg.p2.anten_stop.num
+    elif (cfg.stop.num > 0):
+        exflash2 = cfg.stop.num
+    debug_str_p1 = "1P|EX Flash " + str(exflash1).rjust(7, " ")
+    debug_str_p2 = "2P|EX Flash " + str(exflash2).rjust(7, " ")
     debug_str_p1 += " |Hitstop " + str(cfg.p1.hitstop.num).rjust(7, " ")
     debug_str_p2 += " |Hitstop " + str(cfg.p2.hitstop.num).rjust(7, " ")
     #debug_str_p1 += " y_posi " + str(cfg.p1.y_posi2.num).rjust(7, " ")
