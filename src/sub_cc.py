@@ -337,12 +337,16 @@ def view_st():
 
         # 攻撃判定持続計算
         for n in cfg.p_info:
-            if n.atk.num != 0 and cfg.anten == 0 and n.hitstop.num == 0:  # 攻撃判定を出しているとき
+            if n.atk.num != 0 and cfg.anten == 0 and cfg.hitstop == 0:  # 攻撃判定を出しているとき
                 n.active += 1
             elif n.atk.num == 0 and cfg.anten == 0 and cfg.hitstop <= 1:  # 攻撃判定を出してないとき
                 n.active = 0
-
-        if cfg.anten == 0 and cfg.hitstop <= 1:
+        
+        barcheck = True
+        if cfg.debug_flag == 0:
+            barcheck = cfg.anten == 0 and cfg.hitstop <= 1
+        
+        if barcheck:
             cfg.bar_num += 1
             if cfg.bar_num == cfg.bar_range:
                 cfg.bar_num = 0
@@ -429,7 +433,7 @@ def stop_flame_calc():
         cfg.anten = 0
 
     # ヒットストップ処理
-    if (cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0 and cfg.debug_flag == 0):
+    if (cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0):
         cfg.hitstop += 1
     elif (cfg.p1.hitstop.num == 0 or cfg.p2.hitstop.num == 0):
         cfg.hitstop = 0
