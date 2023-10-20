@@ -923,8 +923,8 @@ def degug_view(state_str):
                     " (" + str(gravity_p2).rjust(2, " ") + " + " + 
                     str(cfg.p2.utpen.num).rjust(2, " ") + ")")
     
-    debug_str_p1 += " |Partner" + str(cfg.p3.motion_type.num).rjust(4, " ") + "(" +  str(cfg.p3.pframe.num).rjust(3, " ") + ")"
-    debug_str_p2 += " |Partner" + str(cfg.p4.motion_type.num).rjust(4, " ") + "(" + str(cfg.p4.pframe.num).rjust(3, " ") + ")"
+    debug_str_p1 += " |Partner" + str(cfg.p3.motion_type.num).rjust(4, " ") + " (" +  str(cfg.p3.pframe.num).rjust(3, " ") + ")"
+    debug_str_p2 += " |Partner" + str(cfg.p4.motion_type.num).rjust(4, " ") + " (" + str(cfg.p4.pframe.num).rjust(3, " ") + ")"
     # debug_str_p2 += " interval " + str(cfg.interval).rjust(7, " ")
     # debug_str_p2 += " Bar80_flag " + str(cfg.Bar80_flag).rjust(7, " ")
     # debug_str_p1 += "anten_stop.ad " + str(cfg.P_info[0].motion_type.ad).rjust(7, " ")
