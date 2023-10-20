@@ -15,6 +15,8 @@ class Character_info:
         self.motion = para(4)
         self.motion_type = para(2)
         self.pframe = para(4)
+        self.health = para(4)
+        self.rhealth = para(4)
         self.x_posi = para(4)
         self.y_posi1 = para(4)
         self.y_posi2 = para(4)

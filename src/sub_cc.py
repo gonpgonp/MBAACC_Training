@@ -173,6 +173,8 @@ def situationCheck():
         para_get(n.motion_type)
         para_get(n.motion)
         para_get(n.pframe)
+        para_get(n.health)
+        para_get(n.rhealth)
         para_get(n.x_posi)
         para_get(n.y_posi1)
         para_get(n.y_posi2)
@@ -700,27 +702,13 @@ def view():
     pf1 = str(cfg.p1.pframe.num).rjust(8, " ")
     pat2 = str(cfg.p2.motion_type.num).rjust(6, " ")
     pf2 = str(cfg.p2.pframe.num).rjust(8, " ")
-    
-    ch1 = ""
-    ch2 = ""
-    
-    if(cfg.p1.chstate.num == 2):
-        ch1 = "Low".rjust(6, " ")
-    elif(cfg.p1.chstate.num == 1):
-        ch1 = "High".rjust(6, " ")
-    else:
-        ch1 = "None".rjust(6, " ")
-
-    if(cfg.p2.chstate.num == 2):
-        ch2 = "Low".rjust(6, " ")
-    elif(cfg.p2.chstate.num == 1):
-        ch2 = "High".rjust(6, " ")
-    else:
-        ch2 = "None".rjust(6, " ")
 
     zen_P1 = str(cfg.p1.zen).rjust(6, " ")
     zen_P2 = str(cfg.p2.zen).rjust(6, " ")
 
+    health_p1 = str(cfg.p1.health.num).rjust(7, " ")
+    health_p2 = str(cfg.p2.health.num).rjust(7, " ")
+    
     circuit_p1 = str(cfg.p1.circuit.num).rjust(6, " ")
     circuit_p2 = str(cfg.p2.circuit.num).rjust(6, " ")
 
@@ -775,7 +763,7 @@ def view():
     state_str += f' {y_p1})'
     state_str += f' |Pattern{pat1}'
     state_str += f' |Frame{pf1}'
-    state_str += f' |Counter{ch1}'
+    state_str += f' |Health{health_p1}'
     state_str += f' |Circuit{circuit_p1}'
 
     if keyboard.is_pressed("F1"):
@@ -803,7 +791,7 @@ def view():
     else:
         f8 = '  [F8]Load state 2'
 
-    state_str += '   ' + f1 + f2 + f6 + f7 + f8 + END
+    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p1},'
@@ -819,15 +807,15 @@ def view():
     state_str += f' {y_p2})'
     state_str += f' |Pattern{pat2}'
     state_str += f' |Frame{pf2}'
-    state_str += f' |Counter{ch2}'
+    state_str += f' |Health{health_p2}'
     state_str += f' |Circuit{circuit_p2}'
     
     if keyboard.is_pressed(",") and keyboard.is_pressed("."):
-        debughotkeys = '  \x1b[007m' + '[,+.]Toggle Debug' + '\x1b[0m'
+        debughotkeys = '  \x1b[007m' + '[,.]Toggle Debug' + '\x1b[0m'
     else:
-        debughotkeys = '  [,+.]Toggle Extra Info'
+        debughotkeys = '  [,.]Toggle Extra Info'
     
-    state_str += '   ' + debughotkeys + END
+    state_str += '   ' + f7 + f8 + debughotkeys + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p2},'
@@ -883,48 +871,82 @@ def degug_view(state_str):
     #debug_str_3 += " bar_num " + str(cfg.bar_num).rjust(7, " ")
     #debug_str_3 += " anten " + str(cfg.anten).rjust(8, " ")
     #debug_str_3 += " stop " + str(cfg.stop.num).rjust(11, " ")
-    exflash1 = 0
     if (cfg.p1.anten_stop.num > 0):
-        exflash1 = cfg.p1.anten_stop.num
-    elif (cfg.stop.num > 0):
-        exflash1 = cfg.stop.num
-    exflash2 = 0
+        exflash_p1 = str(cfg.p1.anten_stop.num).rjust(4, " ")
+    else:
+        exflash_p1 = str(cfg.stop.num).rjust(4, " ")
+
     if (cfg.p2.anten_stop.num > 0):
-        exflash2 = cfg.p2.anten_stop.num
-    elif (cfg.stop.num > 0):
-        exflash2 = cfg.stop.num
-    debug_str_p1 = "1P|EX Flash " + str(exflash1).rjust(7, " ")
-    debug_str_p2 = "2P|EX Flash " + str(exflash2).rjust(7, " ")
-    debug_str_p1 += " |Hitstop " + str(cfg.p1.hitstop.num).rjust(7, " ")
-    debug_str_p2 += " |Hitstop " + str(cfg.p2.hitstop.num).rjust(7, " ")
+        exflash_p2 = str(cfg.p2.anten_stop.num).rjust(4, " ")
+    else:
+        exflash_p2 = str(cfg.stop.num).rjust(4, " ")
+
+    hitstop_p1 = str(cfg.p1.hitstop.num).rjust(4, " ")
+    hitstop_p2 = str(cfg.p2.hitstop.num).rjust(4, " ")
+    
+    debug_str_p1 = f"1P|EX Flash{exflash_p1}"
+    debug_str_p2 = f"2P|EX Flash{exflash_p2}"
+    debug_str_p1 += f" |Hitstop{hitstop_p1}"
+    debug_str_p2 += f" |Hitstop{hitstop_p2}"
+    
+    if(cfg.p1.chstate.num == 2):
+        ch_p1 = "Low".rjust(6, " ")
+    elif(cfg.p1.chstate.num == 1):
+        ch_p1 = "High".rjust(6, " ")
+    else:
+        ch_p1 = "None".rjust(6, " ")
+
+    if(cfg.p2.chstate.num == 2):
+        ch_p2 = "Low".rjust(6, " ")
+    elif(cfg.p2.chstate.num == 1):
+        ch_p2 = "High".rjust(6, " ")
+    else:
+        ch_p2 = "None".rjust(6, " ")
+        
+    debug_str_p1 += f" |Counter{ch_p1}"
+    debug_str_p2 += f" |Counter{ch_p2}"
     #debug_str_p1 += " y_posi " + str(cfg.p1.y_posi2.num).rjust(7, " ")
     #debug_str_p2 += " y_posi " + str(cfg.p2.y_posi2.num).rjust(7, " ")
     #debug_str_p1 += " |tag_flag " + str(cfg.p1.tag_flag.num).rjust(7, " ")
     #debug_str_p2 += " |tag_flag " + str(cfg.p2.tag_flag.num).rjust(7, " ")
     
+    rhealth_p1 = str(cfg.p1.rhealth.num-cfg.p1.health.num).rjust(6, " ")
+    rhealth_p2 = str(cfg.p2.rhealth.num-cfg.p2.health.num).rjust(6, " ")
+    
+    debug_str_p1 += f" |Red Health{rhealth_p1}"
+    debug_str_p2 += f" |Red Health{rhealth_p2}"
+    
     gravity_p1 = cfg.p1.grav.num
     gravity_p1 = max(0, round((gravity_p1 - 0.072) / 0.008))
     gravity_p1 -= math.floor(gravity_p1/60)
     gravity_p1 = math.ceil(gravity_p1/6)
-    #gravity_p1 += cfg.p1.utpen.num
-    grav_hits_p1 = round(cfg.p1.grav.num / 0.008)
+    gravity_p1 = str(gravity_p1).rjust(2, " ")
+    
+    extra_grav_p1 = str(cfg.p1.utpen.num).rjust(2, " ")
+
+    grav_hits_p1 = str(round(cfg.p1.grav.num / 0.008)).rjust(3, " ")
     
     gravity_p2 = cfg.p2.grav.num
     gravity_p2 = max(0, round((gravity_p2 - 0.072) / 0.008))
     gravity_p2 -= math.floor(gravity_p2/60)
     gravity_p2 = math.ceil(gravity_p2/6)
-    #gravity_p2 += cfg.p2.utpen.num
-    grav_hits_p2 = round(cfg.p2.grav.num / 0.008)
+    gravity_p2 = str(gravity_p2).rjust(2, " ")
     
-    debug_str_p1 += (" |Penalty" + str(grav_hits_p1).rjust(3, " ") + 
-                    " (" + str(gravity_p1).rjust(2, " ") + " + " + 
-                    str(cfg.p1.utpen.num).rjust(2, " ") + ")")
-    debug_str_p2 += (" |Penalty" + str(grav_hits_p2).rjust(3, " ") + 
-                    " (" + str(gravity_p2).rjust(2, " ") + " + " + 
-                    str(cfg.p2.utpen.num).rjust(2, " ") + ")")
+    extra_grav_p2 = str(cfg.p2.utpen.num).rjust(2, " ")
+
+    grav_hits_p2 = str(round(cfg.p2.grav.num / 0.008)).rjust(3, " ")
     
-    debug_str_p1 += " |Partner" + str(cfg.p3.motion_type.num).rjust(4, " ") + " (" +  str(cfg.p3.pframe.num).rjust(3, " ") + ")"
-    debug_str_p2 += " |Partner" + str(cfg.p4.motion_type.num).rjust(4, " ") + " (" + str(cfg.p4.pframe.num).rjust(3, " ") + ")"
+    debug_str_p1 += f" |Penalty{grav_hits_p1} ({gravity_p1} + {extra_grav_p1})"
+    debug_str_p2 += f" |Penalty{grav_hits_p2} ({gravity_p2} + {extra_grav_p2})"
+    
+    partner_mot_p1 = str(cfg.p3.motion_type.num).rjust(4, " ")
+    partner_pf_p1 = str(cfg.p3.pframe.num).rjust(3, " ")
+    
+    partner_mot_p2 = str(cfg.p4.motion_type.num).rjust(4, " ")
+    partner_pf_p2 = str(cfg.p4.pframe.num).rjust(3, " ")
+    
+    debug_str_p1 += f" |Partner{partner_mot_p1} ({partner_pf_p1})"
+    debug_str_p2 += f" |Partner{partner_mot_p2} ({partner_pf_p2})"
     # debug_str_p2 += " interval " + str(cfg.interval).rjust(7, " ")
     # debug_str_p2 += " Bar80_flag " + str(cfg.Bar80_flag).rjust(7, " ")
     # debug_str_p1 += "anten_stop.ad " + str(cfg.P_info[0].motion_type.ad).rjust(7, " ")

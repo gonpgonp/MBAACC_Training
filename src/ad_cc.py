@@ -57,6 +57,8 @@ for n in P_info:
     n.dmp.ad = 0x155140 + temp
     n.motion_type.ad = 0x155140 + temp
     n.pframe.ad = 0x155144 + temp
+    n.health.ad = 0x1551EC + temp
+    n.rhealth.ad = 0x1551F0 + temp
     n.atk.ad = 0x155454 + temp
     n.step_inv.ad = 0x1552B5 + temp
     n.x_posi.ad = 0x155140 + 0xF8 + temp
