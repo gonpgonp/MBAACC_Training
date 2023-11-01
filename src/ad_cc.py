@@ -5,6 +5,7 @@ import save_cc
 cfg = cfg_cc
 save = save_cc
 P_info = cfg.P_info
+S_info = save.S_info
 
 ###########################################################################
 # 各種アドレス
@@ -24,7 +25,7 @@ cfg.dummy_st.ad = DUMMY_STATUS_AD = 0x34D7F8
 # STATUS_CPU( 3 )#STATUS_MANUAL( 4 )#STATUS_DUMMY( 5 )
 #STATUS_RECORD( -1 )
 cfg.recording_mode.ad = RECORDING_MODE_AD = 0x155137
-save.stop.ad = save.stop_2.ad = cfg.stop.ad = ANTEN_STOP_AD = 0x162A48  # 全体停止
+cfg.stop.ad = ANTEN_STOP_AD = 0x162A48  # 全体停止
 cfg.game_mode.ad = GAME_MODE_AD = 0x14EEE8
 
 TRAINING_PAUSE_AD = 0x162A64  # メニュー画面開いているとき
@@ -39,18 +40,30 @@ DAT_P2_AD = DAT_P1_AD + PLR_STRUCT_SIZE
 DAT_P3_AD = DAT_P2_AD + PLR_STRUCT_SIZE
 DAT_P4_AD = DAT_P3_AD + PLR_STRUCT_SIZE
 
-save.cam1_x.ad = save.cam1_x_2.ad = CAM1_X_AD = 0x164B14
-save.cam2_x.ad = save.cam2_x_2.ad = CAM1_Y_AD = 0x15DEC4
-save.cam1_y.ad = save.cam1_y_2.ad = CAM2_X_AD = 0x164B18
-save.cam2_y.ad = save.cam2_y_2.ad = CAM2_Y_AD = 0x15DEC8
+CAM1_X_AD = 0x164B14
+CAM1_Y_AD = 0x15DEC4
+CAM2_X_AD = 0x164B18
+CAM2_Y_AD = 0x15DEC8
 
-save.obj.ad = save.obj_2.ad = OBJ_AD = 0x27BD70  # オブジェクトデータ開始位置
-save.stop_situation.ad = save.stop_situation_2.ad = STOP_SITUATION_AD = 0x158600  # 停止状況データ開始位置
-save.damage.ad = save.damage_2.ad = DAMAGE_AD = 0x157DD8  # ダメージアドレス開始位置
-save.damage2.ad = save.damage2_2.ad = DAMAGE2_AD = 0x157E10  # ダメージアドレス開始位置
-save.contl_flag.ad = save.contl_flag_2.ad = CONTL_FLAG_AD = 0x157DB8  # 操作フラグ
-save.contl_flag2.ad = save.contl_flag2_2.ad = CONTL_FLAG_AD = 0x157DBc  # 操作フラグ
+OBJ_AD = 0x27BD70  # オブジェクトデータ開始位置
+STOP_SITUATION_AD = 0x158600  # 停止状況データ開始位置
+DAMAGE_AD = 0x157DD8  # ダメージアドレス開始位置
+DAMAGE2_AD = 0x157E10  # ダメージアドレス開始位置
+CONTL_FLAG_AD = 0x157DB8  # 操作フラグ
+CONTL_FLAG2_AD = 0x157DBc  # 操作フラグ
 
+for m in S_info:
+    m.obj.ad = OBJ_AD
+    m.stop_situation.ad = STOP_SITUATION_AD
+    m.stop.ad = ANTEN_STOP_AD
+    m.damage.ad = DAMAGE_AD
+    m.damage2.ad = DAMAGE2_AD
+    m.cam1_x.ad = CAM1_X_AD
+    m.cam2_x.ad = CAM2_X_AD
+    m.cam1_y.ad = CAM1_Y_AD
+    m.cam2_y.ad = CAM2_Y_AD
+    m.contl_flag.ad = CONTL_FLAG_AD
+    m.contl_flag2.ad = CONTL_FLAG_AD
 
 temp = 0
 for n in P_info:

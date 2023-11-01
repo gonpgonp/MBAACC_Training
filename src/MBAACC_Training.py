@@ -51,7 +51,7 @@ def function_key():
     # 状況記憶
     elif keyboard.is_pressed("F2") or cfg.fn1_key.num == 1 or cfg.fn1_key.num == 3:
         if flag1 == 0:
-            sub.situationMem()
+            sub.sitMem(0)
             sub.pause()
 
             save_flag = 1
@@ -74,7 +74,7 @@ def function_key():
     
     elif keyboard.is_pressed("F7"):
         if flag1 == 0:
-            sub.situationMem2()
+            sub.sitMem(1)
             sub.pause()
 
             save_flag2 = 1
@@ -96,6 +96,7 @@ def function_key():
             os.system('mode con: cols=164 lines=12')
 
         time.sleep(0.3)
+    
     
     elif flag1 >= 1:
         flag1 = 0
@@ -143,10 +144,10 @@ while 1:
             sub.bar_ini()
             
             if save_flag2 == 1 and save2 == 1:
-                sub.situationWrit2()
+                sub.sitWrite(1)
             elif save_flag == 1 and save1 == 1:
                 # 状況再現
-                sub.situationWrit()
+                sub.sitWrite(0)
             elif save_flag != 0:
                 sub.situationWrit()
             

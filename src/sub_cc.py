@@ -91,10 +91,8 @@ def b_unpack(d_obj):
     elif num == 4:
         return unpack('l', d_obj.raw)[0]
 
-
 def f_unpack(d_obj):
     return unpack('f', d_obj.raw)[0]
-
 
 def r_mem(ad, b_obj):
     ReadMem(cfg.h_pro, ad + cfg.base_ad, b_obj, len(b_obj), None)
@@ -227,81 +225,43 @@ def tagCharacterCheck():
         cfg.p_info[1] = cfg.p2 = cfg.P4
         cfg.p_info[3] = cfg.p4 = cfg.P2
 
-
-def situationMem():
-
-    # 状況を記憶
-    save.P_info = copy.deepcopy(cfg.P_info)
-
-    for n in save.P_info:
-        para_get(n.dmp)
-
-    para_get(save.obj)
-    para_get(save.stop_situation)
-    para_get(save.stop)
-    para_get(save.damage)
-    para_get(save.damage2)
-    para_get(save.cam1_x)
-    para_get(save.cam2_x)
-    para_get(save.cam1_y)
-    para_get(save.cam2_y)
-    para_get(save.contl_flag)
-    para_get(save.contl_flag2)
-
-def situationMem2():
-
-    # 状況を記憶
-    save.P_info2 = copy.deepcopy(cfg.P_info)
-
-    for n in save.P_info2:
-        para_get(n.dmp)
-
-    para_get(save.obj_2)
-    para_get(save.stop_situation_2)
-    para_get(save.stop_2)
-    para_get(save.damage_2)
-    para_get(save.damage2_2)
-    para_get(save.cam1_x_2)
-    para_get(save.cam2_x_2)
-    para_get(save.cam1_y_2)
-    para_get(save.cam2_y_2)
-    para_get(save.contl_flag_2)
-    para_get(save.contl_flag2_2)
-
-def situationWrit():
-    # 状況を再現
-    for n in save.P_info:
-        para_set(n.dmp)
-
-    para_set(save.obj)
-    para_set(save.stop_situation)
-    para_set(save.stop)
-    para_set(save.damage)
-    para_set(save.damage2)
-    para_set(save.cam1_x)
-    para_set(save.cam2_x)
-    para_set(save.cam1_y)
-    para_set(save.cam2_y)
-    para_set(save.contl_flag)
-    para_set(save.contl_flag2)
+def sitMem(n):
+    save_info = save.S_info[n]
     
-def situationWrit2():
-    # 状況を再現
-    for n in save.P_info2:
-        para_set(n.dmp)
-
-    para_set(save.obj_2)
-    para_set(save.stop_situation_2)
-    para_set(save.stop_2)
-    para_set(save.damage_2)
-    para_set(save.damage2_2)
-    para_set(save.cam1_x_2)
-    para_set(save.cam2_x_2)
-    para_set(save.cam1_y_2)
-    para_set(save.cam2_y_2)
-    para_set(save.contl_flag_2)
-    para_set(save.contl_flag2_2)
-
+    save_info.P_info = copy.deepcopy(cfg.P_info)
+    
+    for i in save_info.P_info:
+        para_get(i.dmp)
+    
+    para_get(save_info.obj)
+    para_get(save_info.stop_situation)
+    para_get(save_info.stop)
+    para_get(save_info.damage)
+    para_get(save_info.damage2)
+    para_get(save_info.cam1_x)
+    para_get(save_info.cam2_x)
+    para_get(save_info.cam1_y)
+    para_get(save_info.cam2_y)
+    para_get(save_info.contl_flag)
+    para_get(save_info.contl_flag2)
+    
+def sitWrite(n):
+    save_info = save.S_info[n]
+    
+    for i in save_info.P_info:
+        para_set(i.dmp)
+    
+    para_set(save_info.obj)
+    para_set(save_info.stop_situation)
+    para_set(save_info.stop)
+    para_set(save_info.damage)
+    para_set(save_info.damage2)
+    para_set(save_info.cam1_x)
+    para_set(save_info.cam2_x)
+    para_set(save_info.cam1_y)
+    para_set(save_info.cam2_y)
+    para_set(save_info.contl_flag)
+    para_set(save_info.contl_flag2)
 
 def view_st():
 

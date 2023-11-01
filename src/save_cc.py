@@ -2,15 +2,20 @@ from ctypes import create_string_buffer
 import cfg_cc
 cfg = cfg_cc
 
-obj = obj_2 = cfg.para(74576)
-stop_situation = stop_situation_2 = cfg.para(1632)
-stop = stop_2 = cfg.para(1)
-damage = damage_2 = cfg.para(52)
-damage2 = damage2_2 = cfg.para(1004)
+class Save_info:
+    def __init__(self):
+        self.obj = cfg.para(74576)
+        self.stop_situation = cfg.para(1632)
+        self.stop = cfg.para(1)
+        self.damage = cfg.para(52)
+        self.damage2 = cfg.para(1004)
+        self.cam1_x = cfg.para(4)
+        self.cam2_x = cfg.para(4)
+        self.cam1_y = cfg.para(4)
+        self.cam2_y = cfg.para(4)
+        self.contl_flag = cfg.para(4)
+        self.contl_flag2 = cfg.para(4)
+        
+        self.P_info = []
 
-cam1_x = cam1_x_2 = cfg.para(4)
-cam2_x = cam2_x_2 = cfg.para(4)
-cam1_y = cam1_y_2 = cfg.para(4)
-cam2_y = cam2_y_2 = cfg.para(4)
-contl_flag = contl_flag_2 = cfg.para(4)
-contl_flag2 = contl_flag2_2 = cfg.para(4)
+S_info = [Save_info(), Save_info()]
