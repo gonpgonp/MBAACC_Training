@@ -5,6 +5,7 @@ import save_cc
 cfg = cfg_cc
 save = save_cc
 P_info = cfg.P_info
+A_info = cfg.A_info
 S_info = save.S_info
 
 ###########################################################################
@@ -39,6 +40,8 @@ DAT_P1_AD = 0x155140  # 1Pデータ開始位置
 DAT_P2_AD = DAT_P1_AD + PLR_STRUCT_SIZE
 DAT_P3_AD = DAT_P2_AD + PLR_STRUCT_SIZE
 DAT_P4_AD = DAT_P3_AD + PLR_STRUCT_SIZE
+
+ACTOR_STRUCT_SIZE = 0x33C
 
 CAM1_X_AD = 0x164B14
 CAM1_Y_AD = 0x15DEC4
@@ -98,6 +101,14 @@ for n in P_info:
 
     temp += PLR_STRUCT_SIZE
 
+temp2 = 0
+for o in A_info:
+    o.state.ad = 0x27BDFC + temp2
+    o.despawn_check.ad = 0x027BE08 + temp2
+    o.owner.ad = 0x27C0DC + temp2
+    o.atk_data.ad = 0x27C10C + temp2
+    
+    temp2 += ACTOR_STRUCT_SIZE
 
 P_info[0].tag_flag.ad = 0x1552A8
 P_info[1].tag_flag.ad = 0x155DA4

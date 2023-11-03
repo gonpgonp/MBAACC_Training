@@ -18,4 +18,4 @@ class Save_info:
         
         self.P_info = []
 
-S_info = [Save_info(), Save_info()]
+S_info = [Save_info(), Save_info(), Save_info(), Save_info()]

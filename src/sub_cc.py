@@ -205,6 +205,12 @@ def situationCheck():
         para_get_2(n.throw)
 
     tagCharacterCheck()
+    
+    for o in cfg.A_info:
+        para_get(o.state)
+        para_get(o.despawn_check)
+        para_get(o.owner)
+        para_get(o.atk_data)
 
 
 def tagCharacterCheck():
@@ -276,7 +282,8 @@ def view_st():
 
     # キャラの状況推移表示
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or cfg.p1.hit.num != 0 or
-            cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or cfg.p2.hit.num != 0) or (
+            cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or cfg.p2.hit.num != 0 or
+            cfg.p3.atk.num != 0 or cfg.p4.atk.num != 0 or
             cfg.debug_flag == 1 and cfg.directional_input.num != 0):
 
         cfg.reset_flag = 0
@@ -422,6 +429,7 @@ def bar_add():
     BC_DEF = '\x1b[49m'
 
     atk = get_font((255, 255, 255), (255, 0, 0))
+    partner_atk = get_font((255, 255, 255), (255, 128, 0))
     mot = get_font((255, 255, 255), (65, 200, 0))
     grd_stun = get_font((255, 255, 255), (140, 140, 140))
     hit_stun = get_font((255, 255, 255), (140, 140, 140))
@@ -465,9 +473,11 @@ def bar_add():
     ignore_number = [0, 10, 11, 12, 13, 14, 15, 20, 16, 594]
 
     jmp_number = [34, 35, 36, 37]
+    
+    player_num = 0
 
     for n in cfg.p_info:
-
+        #Bar 1
         if n.motion.num != 0:
             num = str(n.motion.num)
             font = mot
@@ -523,6 +533,7 @@ def bar_add():
         
         n.barlist_1[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
 
+        #Bar 2
         font = ""
         num = ""
         
@@ -542,6 +553,7 @@ def bar_add():
 
         n.barlist_2[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
         
+        #Bar 3
         #num = str(n.motion_type.num)
         bar3 = ""
         button_pressed = 0
@@ -576,6 +588,7 @@ def bar_add():
         bar3 += font + num[1] + DEF
         n.barlist_3[cfg.bar_num] = bar3
 
+        #Bar 4
         #num = str(n.rigid_f.num)
         bar4 = ""
         num = cfg.directional_input.num
@@ -602,6 +615,28 @@ def bar_add():
             font = DEF
         bar4 += font + num[1] + DEF
         n.barlist_4[cfg.bar_num] = bar4
+        
+        #Bar5
+        num = ""
+        font = ""
+        
+        if player_num < 2: #get partner attack
+            if cfg.p_info[player_num + 2].atk.num != 0:
+                font = partner_atk
+                num = str(cfg.p_info[player_num + 2].active)
+        
+        for o in cfg.A_info:
+            if o.owner.num == player_num and o.atk_data.num != 0 and o.final_frame == 0:
+                font = atk
+                num = str(o.state.num)
+            if o.despawn_check.num > 1:
+                o.final_frame = 1
+            else:
+                o.final_frame = 0
+        
+        n.barlist_5[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        
+        player_num += 1
 
 
 def bar_ini():
@@ -612,6 +647,8 @@ def bar_ini():
         n.Bar_2 = ""
         n.Bar_3 = ""
         n.Bar_4 = ""
+        n.Bar_5 = ""
+        n.Bar_6 = ""
 
     cfg.st_Bar = ""
     cfg.bar_num = 0
@@ -627,10 +664,12 @@ def bar_ini():
             m.barlist_2[n] = ""
             m.barlist_3[n] = ""
             m.barlist_4[n] = ""
+            m.barlist_5[n] = ""
+            m.barlist_6[n] = ""
 
         cfg.st_barlist[n] = ""
 
-def view():
+def view(extra_save):
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
     
     x_p1 = str(cfg.p1.x_posi.num).rjust(6, " ")
@@ -686,6 +725,8 @@ def view():
         n.Bar_2 = ""
         n.Bar_3 = ""
         n.Bar_4 = ""
+        n.Bar_5 = ""
+        n.Bar_6 = ""
 
     cfg.st_Bar = ""
 
@@ -701,6 +742,8 @@ def view():
             m.Bar_2 += m.barlist_2[temp]
             m.Bar_3 += m.barlist_3[temp]
             m.Bar_4 += m.barlist_4[temp]
+            m.Bar_5 += m.barlist_5[temp]
+            m.Bar_6 += m.barlist_6[temp]
 
         cfg.st_Bar += cfg.st_barlist[temp]
 
@@ -742,14 +785,14 @@ def view():
         f6 = '  [F6]Load state'
 
     if keyboard.is_pressed("F7"):
-        f7 = '  \x1b[007m' + '[F7]Save state 2' + '\x1b[0m'
+        f7 = '    \x1b[007m' + f'[F7]Save state {extra_save}' + '\x1b[0m'
     else:
-        f7 = '  [F7]Save state 2'
+        f7 = f'    [F7]Save state {extra_save}'
 
     if keyboard.is_pressed("F8"):
-        f8 = '  \x1b[007m' + '[F8]Load state 2' + '\x1b[0m'
+        f8 = '  \x1b[007m' + f'[F8]Load state {extra_save}' + '\x1b[0m'
     else:
-        f8 = '  [F8]Load state 2'
+        f8 = f'  [F8]Load state {extra_save}'
 
     state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + END
     
@@ -771,11 +814,11 @@ def view():
     state_str += f' |Circuit{circuit_p2}'
     
     if keyboard.is_pressed(",") and keyboard.is_pressed("."):
-        debughotkeys = '  \x1b[007m' + '[,.]Toggle Debug' + '\x1b[0m'
+        debughotkeys = '  \x1b[007m' + '[,.]Extra Info' + '\x1b[0m'
     else:
-        debughotkeys = '  [,.]Toggle Extra Info'
+        debughotkeys = '  [,.]Extra Info'
     
-    state_str += '   ' + f7 + f8 + debughotkeys + END
+    state_str += '   ' + debughotkeys + f7 + f8 + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p2},'
@@ -805,8 +848,10 @@ def view():
     state_str += '  |' + tempstr + END
     state_str += '1P|' + cfg.p1.Bar_1 + END
     state_str += '  |' + cfg.p1.Bar_2 + END
+    state_str += '  |' + cfg.p1.Bar_5 + END
     state_str += '2P|' + cfg.p2.Bar_1 + END
     state_str += '  |' + cfg.p2.Bar_2 + END
+    state_str += '  |' + cfg.p2.Bar_5 + END
 
     if cfg.debug_flag == 1:
         state_str = degug_view(state_str)

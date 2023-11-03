@@ -63,13 +63,27 @@ class Character_info:
         self.Bar_2 = ''
         self.Bar_3 = ''
         self.Bar_4 = ''
+        self.Bar_5 = ''
+        self.Bar_6 = ''
         self.barlist_1 = list(range(bar_range))
         self.barlist_2 = list(range(bar_range))
         self.barlist_3 = list(range(bar_range))
         self.barlist_4 = list(range(bar_range))
+        self.barlist_5 = list(range(bar_range))
+        self.barlist_6 = list(range(bar_range))
+
+class Actor_info:
+    def __init__(self):
+        self.state = para(4)
+        self.despawn_check = para(4)
+        self.owner = para(1)
+        self.atk_data = para(4)
+        self.final_frame = 0
 
 P_info = [Character_info(), Character_info(), Character_info(), Character_info()]
 p_info = [Character_info(), Character_info(), Character_info(), Character_info()]
+
+A_info = [Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info()]
 
 for info1, info2 in zip(P_info, p_info):
     for n in range(bar_range):
@@ -77,11 +91,15 @@ for info1, info2 in zip(P_info, p_info):
         info1.barlist_2[n] = ""
         info1.barlist_3[n] = ""
         info1.barlist_4[n] = ""
+        info1.barlist_5[n] = ""
+        info1.barlist_6[n] = ""
 
         info2.barlist_1[n] = ""
         info2.barlist_2[n] = ""
         info2.barlist_3[n] = ""
         info2.barlist_4[n] = ""
+        info2.barlist_5[n] = ""
+        info2.barlist_6[n] = ""
 
 pid = 0
 h_pro = 0
@@ -113,6 +131,12 @@ p2 = p_info[1]
 p3 = p_info[2]
 p4 = p_info[3]
 
+a1 = A_info[0]
+a2 = A_info[1]
+a3 = A_info[2]
+a4 = A_info[3]
+
+
 st_barlist = list(range(bar_range))
 for n in range(bar_range):
     st_barlist[n] = ""
@@ -134,3 +158,4 @@ interval_time = 0
 reset_flag = 0
 temp = create_string_buffer(4)
 debug_flag = 0
+extra_save = 1
