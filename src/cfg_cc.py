@@ -74,16 +74,16 @@ class Character_info:
 
 class Actor_info:
     def __init__(self):
+        self.pattern = para(4)
         self.state = para(4)
         self.despawn_check = para(4)
         self.owner = para(1)
         self.atk_data = para(4)
-        self.final_frame = 0
 
 P_info = [Character_info(), Character_info(), Character_info(), Character_info()]
 p_info = [Character_info(), Character_info(), Character_info(), Character_info()]
 
-A_info = [Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info(), Actor_info()]
+A_info = [Actor_info() for i in range(100)]
 
 for info1, info2 in zip(P_info, p_info):
     for n in range(bar_range):

@@ -103,8 +103,9 @@ for n in P_info:
 
 temp2 = 0
 for o in A_info:
+    o.despawn_check.ad = 0x027BDE8 + temp2
+    o.pattern.ad = 0x27BDF8 + temp2
     o.state.ad = 0x27BDFC + temp2
-    o.despawn_check.ad = 0x027BE08 + temp2
     o.owner.ad = 0x27C0DC + temp2
     o.atk_data.ad = 0x27C10C + temp2
     

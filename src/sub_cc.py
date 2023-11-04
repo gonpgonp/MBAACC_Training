@@ -207,6 +207,7 @@ def situationCheck():
     tagCharacterCheck()
     
     for o in cfg.A_info:
+        para_get(o.pattern)
         para_get(o.state)
         para_get(o.despawn_check)
         para_get(o.owner)
@@ -625,14 +626,17 @@ def bar_add():
                 font = partner_atk
                 num = str(cfg.p_info[player_num + 2].active)
         
+        count = 0
+        
         for o in cfg.A_info:
-            if o.owner.num == player_num and o.atk_data.num != 0 and o.final_frame == 0:
+            if o.owner.num == player_num and o.atk_data.num != 0 and o.despawn_check.num == 1:
                 font = atk
-                num = str(o.state.num)
-            if o.despawn_check.num > 1:
-                o.final_frame = 1
-            else:
-                o.final_frame = 0
+                count += 1
+        
+        if count > 0:
+            num = str(count)
+        else:
+            num = ""
         
         n.barlist_5[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
         
@@ -963,7 +967,7 @@ def degug_view(state_str):
     state_str += "\x1b[0m"
     # state_str += '1P|' + cfg.p1.Bar_2 + END
     state_str += '1P|' + cfg.p1.Bar_3 + END
-    state_str += '1P|' + cfg.p1.Bar_4 + END
+    state_str += '  |' + cfg.p1.Bar_4 + END
 
     return state_str
 
