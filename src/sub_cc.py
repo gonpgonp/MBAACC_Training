@@ -937,6 +937,8 @@ def degug_view(state_str):
     # state_str += '1P|' + cfg.p1.Bar_2 + END
     state_str += '1P|' + cfg.p1.Bar_3 + END
     state_str += '  |' + cfg.p1.Bar_4 + END
+    state_str += '2P|' + cfg.p2.Bar_3 + END
+    state_str += '  |' + cfg.p2.Bar_4 + END
 
     return state_str
 

@@ -81,7 +81,7 @@ def function_key():
     elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
         if cfg.debug_flag == 0:
             cfg.debug_flag = 1
-            os.system('mode con: cols=164 lines=19')
+            os.system('mode con: cols=164 lines=21')
 
         elif cfg.debug_flag == 1:
             cfg.debug_flag = 0
