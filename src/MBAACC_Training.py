@@ -23,11 +23,10 @@ num_saves = 4
 is_saved = [0] * num_saves
 save_to_load = 0
 flag1 = 0
-ispaused = 0
 start_time = time.time()
 framestep = 0
 extra_save = 1
-    
+
 
 def function_key():
 
@@ -35,7 +34,6 @@ def function_key():
     global is_saved
     global save_to_load
     global flag1
-    global ispaused
     global framestep
     global extra_save
     
@@ -57,7 +55,6 @@ def function_key():
 
     elif cfg.fn2_key.num == 1 or cfg.fn2_key.num == 3:
         save_to_load = 0
-        ispaused = 0
         if flag1 == 0:
             flag1 = 1
             if cfg.dummy_st.num == 5 or cfg.dummy_st.num == -1:
@@ -124,7 +121,7 @@ while 1:
     sub.mode_check()
 
     if cfg.game_mode.num == 20:
-        save_flag = 0
+        is_saved = [0] * num_saves
 
     function_key()
 

@@ -11,54 +11,61 @@ class para:
 
 class Character_info:
     def __init__(self):
+        #Full Character
         self.dmp = para(971)
-        self.motion = para(4)
-        self.motion_type = para(2)
-        self.pframe = para(4)
+        
+        #State
+        self.exist = para(1)
+        self.pattern = para(2)
+        self.state = para(4)
+        
+        #Meters
         self.health = para(4)
         self.rhealth = para(4)
+        self.circuit = para(4)
+        
+        #Movement
         self.x_posi = para(4)
         self.y_posi1 = para(4)
         self.y_posi2 = para(4)
         self.x_spd = para(4)
-        self.x_acc = para(2)
-        self.momentum = para(4)
         self.y_spd = para(4)
+        self.x_acc = para(2)
         self.y_acc = para(2)
-        self.air_flag = para(4)
-        self.circuit = para(4)
-        self.atk = para(4)
-        self.atk_st_pointer = para(4)
-        self.atk_st = para(1)
-        self.inv = para(1)
-        self.step_inv = para(1)
-        self.seeld = para(1)
-        self.tag_flag = para(1)
-        self.anten_stop = para(1)
-        self.anten_stop2 = para(4)
+        self.momentum = para(4)
+
+        #Others
+        self.shield_time = para(2)
         self.hitstop = para(1)
-        self.stop = para(1)
-        self.hitstun = para(4)
-        self.untech = para(2)
+        self.step_inv = para(1)
+        self.airtime = para(2)
         self.untechend = para(2)
+        self.untech = para(2)
+        self.hitstun = para(4)
         self.chstate = para(1)
         self.grav = para(4)
         self.utpen = para(2)
-
-        self.hit = para(2)
-        self.noguard = para(1)
-        self.throw = para(4)
-        self.throw_inv = para(1)
-        self.rigid_f = para(1)
-
-        self.motion_type_old = 0
-        self.motion_chenge_flag = 0
-        self.act = 0
-        self.first_active = 0
+        
+        #Inputs
+        self.dir_input = para(1)
+        self.button_input = para(1)
+        self.macro_input = para(1)
+        
+        #Pointers
+        self.pat_st_pointer = para(4)
+        self.anim_st_pointer = para(4)
+        self.atk_st_pointer = para(4)
+        
+        #Pointer Children
+        self.anim_box = para(1)
+        
+        #Addresses outside of character
+        self.tag_flag = para(1)
+        self.anten_stop = para(1)
+        self.motion = para(4)
+        
         self.active = 0
-
-        self.zen = 0
-        self.act_flag = 0
+        
         self.Bar_1 = ''
         self.Bar_2 = ''
         self.Bar_3 = ''
@@ -74,11 +81,16 @@ class Character_info:
 
 class Actor_info:
     def __init__(self):
+        #State
+        self.exist = para(1)
         self.pattern = para(4)
         self.state = para(4)
-        self.despawn_check = para(4)
+        
+        #Others
         self.owner = para(1)
-        self.atk_data = para(4)
+        
+        #Pointers
+        self.atk_st_pointer = para(4)
 
 P_info = [Character_info(), Character_info(), Character_info(), Character_info()]
 p_info = [Character_info(), Character_info(), Character_info(), Character_info()]
@@ -107,13 +119,6 @@ base_ad = 0
 f_timer = 0
 b_timer = create_string_buffer(4)
 f_timer2 = 0
-directional_input = para(1)
-a_input = para(1)
-b_input = para(1)
-c_input = para(1)
-d_input = para(1)
-e_input = para(1)
-ab_input = para(1)
 fn1_key = para(1)
 fn2_key = para(1)
 dummy_st = para(1)
@@ -130,12 +135,6 @@ p1 = p_info[0]
 p2 = p_info[1]
 p3 = p_info[2]
 p4 = p_info[3]
-
-a1 = A_info[0]
-a2 = A_info[1]
-a3 = A_info[2]
-a4 = A_info[3]
-
 
 st_barlist = list(range(bar_range))
 for n in range(bar_range):
