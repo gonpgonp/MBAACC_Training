@@ -25,7 +25,6 @@ TRAINING_PAUSE_AD = 0x162A64  # メニュー画面開いているとき
 MAX_DAMAGE_AD = 0x157E0C
 CIRCUIT_POSITION = 0x15DEF0
 RESET_AD = 0x15DEC3  # リセット FF
-COMB_AFTER_TIMER_AD = 0x36E708
 
 PLR_STRUCT_BASE_ADDRESS = 0x155130
 PLR_STRUCT_SIZE = 0xAFC  # 3084
@@ -87,7 +86,6 @@ for n in P_info:
     n.shield_time.ad =  loop_address + 0x16C
     n.hitstop.ad =      loop_address + 0x172
     n.step_inv.ad =     loop_address + 0x185
-    n.airtime.ad =      loop_address + 0x18A
     n.untechend.ad =    loop_address + 0x18E
     n.untech.ad =       loop_address + 0x190
     n.hitstun.ad =      loop_address + 0x1AC

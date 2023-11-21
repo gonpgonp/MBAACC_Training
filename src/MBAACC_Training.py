@@ -25,7 +25,6 @@ save_to_load = 0
 flag1 = 0
 start_time = time.time()
 framestep = 0
-extra_save = 1
 
 
 def function_key():
@@ -35,7 +34,6 @@ def function_key():
     global save_to_load
     global flag1
     global framestep
-    global extra_save
     
     # セーブデータリセット
     if keyboard.is_pressed("F1"):
@@ -59,7 +57,6 @@ def function_key():
             flag1 = 1
             if cfg.dummy_st.num == 5 or cfg.dummy_st.num == -1:
                 sub.situationReset()
-            sub.w_mem(ad.COMB_AFTER_TIMER_AD, b'\xFF')
     
     elif keyboard.is_pressed("F6") and is_saved[0] == 1:
         save_to_load = 0
@@ -67,14 +64,14 @@ def function_key():
     
     elif keyboard.is_pressed("F7"):
         if flag1 == 0:
-            sub.sitMem(extra_save)
+            sub.sitMem(cfg.extra_save)
             sub.pause()
 
-            is_saved[extra_save] = 1
+            is_saved[cfg.extra_save] = 1
             flag1 = 1
     
-    elif keyboard.is_pressed("F8") and is_saved[extra_save] == 1:
-        save_to_load = extra_save
+    elif keyboard.is_pressed("F8") and is_saved[cfg.extra_save] == 1:
+        save_to_load = cfg.extra_save
         sub.situationReset()
 
     # デバッグ表示
@@ -90,13 +87,13 @@ def function_key():
         time.sleep(0.3)
     
     elif (keyboard.is_pressed("1")):
-        extra_save = 1
+        cfg.extra_save = 1
 
     elif (keyboard.is_pressed("2")):
-        extra_save = 2
+        cfg.extra_save = 2
 
     elif (keyboard.is_pressed("3")):
-        extra_save = 3
+        cfg.extra_save = 3
     
     elif flag1 >= 1:
         flag1 = 0
@@ -115,7 +112,7 @@ sub.get_base_addres()
 sub.disable_fn1()
 
 while 1:
-    time.sleep(0.003)
+    time.sleep(0.001)
 
     # MODEチェック
     sub.mode_check()
@@ -137,17 +134,18 @@ while 1:
         # 各種数値の取得
         sub.situationCheck()
 
+        if cfg.f_timer == 0:
+            sub.bar_ini()
+
         # ゲーム状況の取得
         sub.view_st()
 
         if cfg.f_timer == 1:
-            sub.bar_ini()
+            #sub.bar_ini()
             
             for i in range(0, num_saves):
                 if save_to_load == i and is_saved[i] == 1:
                     sub.sitWrite(i)
-                #elif save_to_load == 0 and is_saved[0] == 1:
-                    # 状況再現
-                    #sub.sitWrite(0)
-            
-    sub.view(extra_save)
+                    sub.bar_ini()
+    
+    sub.view()

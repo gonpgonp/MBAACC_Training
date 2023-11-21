@@ -1,7 +1,6 @@
 from ctypes import create_string_buffer
 Bar80_flag = 0
 bar_range = 80
-cre = create_string_buffer
 
 class para:
     def __init__(self, byte_len):
@@ -38,7 +37,6 @@ class Character_info:
         self.shield_time = para(2)
         self.hitstop = para(1)
         self.step_inv = para(1)
-        self.airtime = para(2)
         self.untechend = para(2)
         self.untech = para(2)
         self.hitstun = para(4)
@@ -54,10 +52,13 @@ class Character_info:
         #Pointers
         self.pat_st_pointer = para(4)
         self.anim_st_pointer = para(4)
+        self.st_pointer = para(4) #child of anim_st_pointer
         self.atk_st_pointer = para(4)
         
         #Pointer Children
         self.anim_box = para(1)
+        self.st_sac = para(1)
+        self.st_invuln = para(1)
         
         #Addresses outside of character
         self.tag_flag = para(1)

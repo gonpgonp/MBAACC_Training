@@ -125,6 +125,11 @@ def para_get_f(obj):
     obj.num  = r_mem_f(obj.ad, obj.b_dat)
 
 
+def pointer_get(obj, parent, offset):
+    obj.ad = parent.num + offset
+    para_get_2(obj)
+
+
 def para_set(obj):
     w_mem(obj.ad, obj.b_dat)
 
@@ -183,7 +188,6 @@ def situationCheck():
         para_get(n.shield_time)
         para_get(n.hitstop)
         para_get(n.step_inv)
-        para_get(n.airtime)
         para_get(n.untechend)
         para_get(n.untech)
         para_get(n.hitstun)
@@ -201,8 +205,10 @@ def situationCheck():
         para_get(n.atk_st_pointer)
         
         #Pointer Children
-        n.anim_box.ad = n.anim_st_pointer.num + 0x42
-        para_get_2(n.anim_box)
+        pointer_get(n.st_pointer, n.anim_st_pointer, 0x38)
+        pointer_get(n.st_sac, n.st_pointer, 0xC)
+        pointer_get(n.st_invuln, n.st_pointer, 0xD)
+        pointer_get(n.anim_box, n.anim_st_pointer, 0x42)
 
         #Addresses outside of character
         para_get(n.tag_flag)
@@ -286,14 +292,13 @@ def sitWrite(n):
 
 
 def view_st():
-
     advantage_calc()
     
     # キャラの状況推移表示
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or
             cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or
             cfg.p3.atk_st_pointer.num != 0 or cfg.p4.atk_st_pointer.num != 0 or
-            cfg.debug_flag == 1 and cfg.p1.dir_input.num != 0):
+            cfg.debug_flag == 1 and (cfg.p1.dir_input.num != 0 or cfg.p2.dir_input.num != 0)):
 
         cfg.reset_flag = 0
         cfg.bar_flag = 1
@@ -405,7 +410,6 @@ def get_font(text_rgb, bg_rgb):
 
 
 def bar_add():
-
     DEF = '\x1b[0m'
     FC_DEF = '\x1b[39m'
     BC_DEF = '\x1b[49m'
@@ -419,11 +423,8 @@ def bar_add():
     jmp = get_font((177, 177, 177), (241, 224, 132))
     seeld = get_font((255, 255, 255), (145, 194, 255))
     inv = get_font((180, 180, 180), (255, 255, 255))
-    inv_atk = get_font((255, 255, 255), (255, 160, 160))
     adv = get_font((255, 255, 255), (0, 0, 0))
     bunker = get_font((255, 255, 255), (225, 184, 0))
-    bunker_atk = get_font((255, 255, 255), (225, 102, 0))
-    air = get_font((125, 127, 168), (125, 127, 168))
     throw_number = [350]  # 投げやられ
     a_font = get_font((255, 143, 169), (170, 27, 58))
     b_font = get_font((255, 255, 137), (169, 91, 7))
@@ -461,8 +462,6 @@ def bar_add():
 
     for n in cfg.p_info:
         #Bar 1
-        is_airborne = n.y_acc.num != 0 or n.y_posi1.num != 0 or n.y_posi2.num != 0 or n.airtime.num > 0
-        
         if n.motion.num != 0:
             num = str(n.motion.num)
             font = mot
@@ -474,10 +473,10 @@ def bar_add():
             for list_a in hit_number:  # ヒット中
                 if n.pattern.num == list_a:
                     font = hit_stun
-                    if ~(is_airborne):  # 地上にいる場合
+                    if n.st_sac.num != 1:  # 地上にいる場合
                         if (n.hitstun.num - 1) > 0:
                             num = str(n.hitstun.num - 1)
-                    elif is_airborne:  # 空中にいる場合:
+                    elif n.st_sac.num == 1:  # 空中にいる場合:
                         if (n.untechend.num - n.untech.num) > 0:
                             num = str(n.untechend.num - n.untech.num)
                     break
@@ -485,7 +484,7 @@ def bar_add():
             for list_a in grd_number:  # ガード中
                 if n.pattern.num == list_a:
                     font = grd_stun
-                    if ~(is_airborne):  # 地上にいる場合
+                    if n.st_sac.num != 1:  # 地上にいる場合
                             if (n.hitstun.num - 1) > 0:
                                 num = str(n.hitstun.num - 1)
                             else:
@@ -510,7 +509,7 @@ def bar_add():
         elif n.anim_box.num == 10 and n.shield_time.num > 0:  # シールド
             font = seeld
 
-        elif n.anim_box.num == 1 or n.anim_box.num == 0 or n.step_inv.num != 0:  # 無敵中
+        elif n.anim_box.num == 1 or n.anim_box.num == 0 or n.step_inv.num != 0 or n.st_invuln.num == 3:  # 無敵中
             font = inv
         
         if cfg.stop.num != 0 and cfg.debug_flag == 1:
@@ -522,7 +521,7 @@ def bar_add():
         font = ""
         num = ""
         
-        if is_airborne:  # 空中にいる場合:
+        if n.st_sac.num == 1:  # 空中にいる場合:
             num = "^"
         elif cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
             num = "*"
@@ -534,15 +533,14 @@ def bar_add():
                 font += "\x1b[4m"
 
         if cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
-            font += "\x1b[38;2;160;200;200m"
+            font += "\x1b[38;2;50;150;255m"
 
         n.barlist_2[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
         
         #Bar 3
-        #num = str(n.pattern.num)
         bar3 = ""
         button_pressed = 0
-        if n.button_input.num != 0 and n.macro_input.num != 0:
+        if n.button_input.num != 0 or n.macro_input.num != 0:
             button_pressed = 1
         
         if n.macro_input.num > 0:
@@ -648,7 +646,7 @@ def bar_ini():
 
         cfg.st_barlist[n] = ""
 
-def view(extra_save):
+def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
     
     x_p1 = str(cfg.p1.x_posi.num).rjust(6, " ")
@@ -689,7 +687,6 @@ def view(extra_save):
 
     advantage_f = str(cfg.advantage_f).rjust(6, " ")
 
-    kyori = cfg.p1.x_posi.num - cfg.p2.x_posi.num
     trange = cfg.p1.x_posi.num - cfg.p2.x_posi.num
     prange = math.floor(cfg.p1.x_posi.num/128) - math.floor(cfg.p2.x_posi.num/128)
 
@@ -719,11 +716,6 @@ def view(extra_save):
             m.Bar_6 += m.barlist_6[temp]
 
         cfg.st_Bar += cfg.st_barlist[temp]
-
-    if kyori < 0:
-        kyori = kyori * -1
-    kyori = kyori / (21845)
-    kyori = str(kyori)[:5]
     
     if trange < 0:
         trange = trange * -1
@@ -758,16 +750,16 @@ def view(extra_save):
         f6 = '  [F6]Load state'
 
     if keyboard.is_pressed("F7"):
-        f7 = '    \x1b[007m' + f'[F7]Save state {extra_save}' + '\x1b[0m'
+        f7 = '    \x1b[007m' + f'[F7]Save state {cfg.extra_save}' + '\x1b[0m'
     else:
-        f7 = f'    [F7]Save state {extra_save}'
+        f7 = f'    [F7]Save state {cfg.extra_save}'
 
     if keyboard.is_pressed("F8"):
-        f8 = '  \x1b[007m' + f'[F8]Load state {extra_save}' + '\x1b[0m'
+        f8 = '  \x1b[007m' + f'[F8]Load state {cfg.extra_save}' + '\x1b[0m'
     else:
-        f8 = f'  [F8]Load state {extra_save}'
+        f8 = f'  [F8]Load state {cfg.extra_save}'
 
-    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + END
+    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + str(temp) + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p1},'
@@ -934,11 +926,12 @@ def degug_view(state_str):
     state_str += "\x1b[4m"
     state_str += debug_str_3 + END
     state_str += "\x1b[0m"
-    # state_str += '1P|' + cfg.p1.Bar_2 + END
+
     state_str += '1P|' + cfg.p1.Bar_3 + END
     state_str += '  |' + cfg.p1.Bar_4 + END
     state_str += '2P|' + cfg.p2.Bar_3 + END
     state_str += '  |' + cfg.p2.Bar_4 + END
+    
 
     return state_str
 
