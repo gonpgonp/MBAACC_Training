@@ -294,11 +294,15 @@ def sitWrite(n):
 def view_st():
     advantage_calc()
     
+    is_input = (cfg.p1.dir_input.num != 0 or cfg.p2.dir_input.num != 0 or
+    cfg.p1.button_input.num != 0 or cfg.p2.button_input.num != 0 or
+    cfg.p1.macro_input.num != 0 or cfg.p2.macro_input.num != 0)
+    
     # キャラの状況推移表示
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or
             cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or
             cfg.p3.atk_st_pointer.num != 0 or cfg.p4.atk_st_pointer.num != 0 or
-            cfg.debug_flag == 1 and (cfg.p1.dir_input.num != 0 or cfg.p2.dir_input.num != 0)):
+            cfg.debug_flag == 1 and (is_input)):
 
         cfg.reset_flag = 0
         cfg.bar_flag = 1
@@ -330,9 +334,16 @@ def view_st():
             barcheck = cfg.anten == 0 and cfg.hitstop <= 1
         
         if barcheck:
-            cfg.bar_num += 1
-            if cfg.bar_num == cfg.bar_range:
-                cfg.bar_num = 0
+            if cfg.bar_num < cfg.mem_range - 1:
+                cfg.bar_num += 1
+            if cfg.bar_num == cfg.mem_range - 1:
+                for m in cfg.p_info:
+                    m.barlist_1 = m.barlist_1[1:] + [""]
+                    m.barlist_2 = m.barlist_2[1:] + [""]
+                    m.barlist_3 = m.barlist_3[1:] + [""]
+                    m.barlist_4 = m.barlist_4[1:] + [""]
+                    m.barlist_5 = m.barlist_5[1:] + [""]
+                #cfg.bar_num = 0
                 cfg.Bar80_flag = 1
 
         # バー追加処理
@@ -361,8 +372,8 @@ def advantage_calc():
 def determineReset():
     bar_ini_flag = 0
 
-    if cfg.Bar80_flag == 1:
-        cfg.interval_time = 10
+    if cfg.bar_num > 80:
+        cfg.interval_time = 20
 
     # インターバル後の初期化
     if cfg.interval_time <= cfg.interval:
@@ -625,26 +636,21 @@ def bar_ini():
         n.Bar_3 = ""
         n.Bar_4 = ""
         n.Bar_5 = ""
-        n.Bar_6 = ""
 
-    cfg.st_Bar = ""
     cfg.bar_num = 0
     cfg.interval = 0
     cfg.interval2 = 0
     cfg.bar_ini_flag2 = 0
     cfg.Bar80_flag = 0
     cfg.interval_time = 80
+    cfg.bar_offset = 0
 
-    for n in range(cfg.bar_range):
-        for m in cfg.p_info:
-            m.barlist_1[n] = ""
-            m.barlist_2[n] = ""
-            m.barlist_3[n] = ""
-            m.barlist_4[n] = ""
-            m.barlist_5[n] = ""
-            m.barlist_6[n] = ""
-
-        cfg.st_barlist[n] = ""
+    for m in cfg.p_info:
+        m.barlist_1 = [""] * cfg.mem_range
+        m.barlist_2 = [""] * cfg.mem_range
+        m.barlist_3 = [""] * cfg.mem_range
+        m.barlist_4 = [""] * cfg.mem_range
+        m.barlist_5 = [""] * cfg.mem_range
 
 def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
@@ -696,26 +702,23 @@ def view():
         n.Bar_3 = ""
         n.Bar_4 = ""
         n.Bar_5 = ""
-        n.Bar_6 = ""
 
-    cfg.st_Bar = ""
+    
+    if cfg.bar_num <= 80:
+        start = 0
+    else:
+        start = cfg.bar_num - 80 - cfg.bar_offset
+    
+    r = range(start, start + 80)
 
-    temp = cfg.bar_num
-
-    for n in range(cfg.bar_range):
-        temp += 1
-        if temp == cfg.bar_range:
-            temp = 0
+    for n in r:
 
         for m in cfg.p_info:
-            m.Bar_1 += m.barlist_1[temp]
-            m.Bar_2 += m.barlist_2[temp]
-            m.Bar_3 += m.barlist_3[temp]
-            m.Bar_4 += m.barlist_4[temp]
-            m.Bar_5 += m.barlist_5[temp]
-            m.Bar_6 += m.barlist_6[temp]
-
-        cfg.st_Bar += cfg.st_barlist[temp]
+            m.Bar_1 += m.barlist_1[n]
+            m.Bar_2 += m.barlist_2[n]
+            m.Bar_3 += m.barlist_3[n]
+            m.Bar_4 += m.barlist_4[n]
+            m.Bar_5 += m.barlist_5[n]
     
     if trange < 0:
         trange = trange * -1
@@ -759,7 +762,7 @@ def view():
     else:
         f8 = f'  [F8]Load state {cfg.extra_save}'
 
-    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + str(temp) + END
+    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p1},'
@@ -835,12 +838,9 @@ def degug_view(state_str):
             tempstr += "\x1b[4;48;5;238m"
         else:
             tempstr += "\x1b[0;4m"
-    # os.system('mode con: cols=166 lines=15')
+
     debug_str_3 = '  |' + tempstr
-    #debug_str_3 = "  |frame timer" + str(cfg.f_timer).rjust(7, " ")
-    #debug_str_3 += " bar_num " + str(cfg.bar_num).rjust(7, " ")
-    #debug_str_3 += " anten " + str(cfg.anten).rjust(8, " ")
-    #debug_str_3 += " stop " + str(cfg.stop.num).rjust(11, " ")
+    
     if (cfg.p1.anten_stop.num > 0):
         exflash_p1 = str(cfg.p1.anten_stop.num).rjust(4, " ")
     else:
@@ -875,10 +875,6 @@ def degug_view(state_str):
         
     debug_str_p1 += f" |Counter{ch_p1}"
     debug_str_p2 += f" |Counter{ch_p2}"
-    #debug_str_p1 += " y_posi " + str(cfg.p1.y_posi2.num).rjust(7, " ")
-    #debug_str_p2 += " y_posi " + str(cfg.p2.y_posi2.num).rjust(7, " ")
-    #debug_str_p1 += " |tag_flag " + str(cfg.p1.tag_flag.num).rjust(7, " ")
-    #debug_str_p2 += " |tag_flag " + str(cfg.p2.tag_flag.num).rjust(7, " ")
     
     rhealth_p1 = str(cfg.p1.rhealth.num-cfg.p1.health.num).rjust(6, " ")
     rhealth_p2 = str(cfg.p2.rhealth.num-cfg.p2.health.num).rjust(6, " ")
@@ -917,9 +913,6 @@ def degug_view(state_str):
     
     debug_str_p1 += f" |Partner{partner_mot_p1} ({partner_pf_p1})"
     debug_str_p2 += f" |Partner{partner_mot_p2} ({partner_pf_p2})"
-    # debug_str_p2 += " interval " + str(cfg.interval).rjust(7, " ")
-    # debug_str_p2 += " Bar80_flag " + str(cfg.Bar80_flag).rjust(7, " ")
-    # debug_str_p1 += "anten_stop.ad " + str(cfg.P_info[0].pattern.ad).rjust(7, " ")
 
     state_str += debug_str_p1 + END
     state_str += debug_str_p2 + END

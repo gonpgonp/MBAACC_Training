@@ -74,6 +74,14 @@ def function_key():
         save_to_load = cfg.extra_save
         sub.situationReset()
 
+    elif keyboard.is_pressed("right") and cfg.bar_offset > 0:
+        cfg.bar_offset_f -= 0.15
+        cfg.bar_offset = round(cfg.bar_offset_f)
+    
+    elif keyboard.is_pressed("left") and cfg.bar_offset < cfg.bar_num - 81:
+        cfg.bar_offset_f += 0.15
+        cfg.bar_offset = round(cfg.bar_offset_f)
+
     # デバッグ表示
     elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
         if cfg.debug_flag == 0:

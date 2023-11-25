@@ -1,6 +1,7 @@
 from ctypes import create_string_buffer
 Bar80_flag = 0
 bar_range = 80
+mem_range = 400
 
 class para:
     def __init__(self, byte_len):
@@ -72,13 +73,11 @@ class Character_info:
         self.Bar_3 = ''
         self.Bar_4 = ''
         self.Bar_5 = ''
-        self.Bar_6 = ''
-        self.barlist_1 = list(range(bar_range))
-        self.barlist_2 = list(range(bar_range))
-        self.barlist_3 = list(range(bar_range))
-        self.barlist_4 = list(range(bar_range))
-        self.barlist_5 = list(range(bar_range))
-        self.barlist_6 = list(range(bar_range))
+        self.barlist_1 = [""] * mem_range
+        self.barlist_2 = [""] * mem_range
+        self.barlist_3 = [""] * mem_range
+        self.barlist_4 = [""] * mem_range
+        self.barlist_5 = [""] * mem_range
 
 class Actor_info:
     def __init__(self):
@@ -105,14 +104,12 @@ for info1, info2 in zip(P_info, p_info):
         info1.barlist_3[n] = ""
         info1.barlist_4[n] = ""
         info1.barlist_5[n] = ""
-        info1.barlist_6[n] = ""
 
         info2.barlist_1[n] = ""
         info2.barlist_2[n] = ""
         info2.barlist_3[n] = ""
         info2.barlist_4[n] = ""
         info2.barlist_5[n] = ""
-        info2.barlist_6[n] = ""
 
 pid = 0
 h_pro = 0
@@ -137,15 +134,13 @@ p2 = p_info[1]
 p3 = p_info[2]
 p4 = p_info[3]
 
-st_barlist = list(range(bar_range))
-for n in range(bar_range):
-    st_barlist[n] = ""
-
 bar_flag = 0
 bar_num = 0
 bar_ini_flag = 0
 bar_ini_flag2 = 0
 st_Bar = ""
+bar_offset_f = 0.0
+bar_offset = 0
 
 DataFlag1 = 1
 anten = 0
