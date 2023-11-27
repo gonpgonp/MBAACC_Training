@@ -139,8 +139,8 @@ bar_num = 0
 bar_ini_flag = 0
 bar_ini_flag2 = 0
 st_Bar = ""
-bar_offset_f = 0.0
 bar_offset = 0
+last_key_time = 0
 
 DataFlag1 = 1
 anten = 0

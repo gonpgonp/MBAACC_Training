@@ -1,4 +1,3 @@
-from ctypes import windll, wintypes, byref
 from struct import unpack, pack
 import os
 import time
@@ -302,7 +301,7 @@ def view_st():
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or
             cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or
             cfg.p3.atk_st_pointer.num != 0 or cfg.p4.atk_st_pointer.num != 0 or
-            cfg.debug_flag == 1 and (is_input)):
+            cfg.debug_flag == 1 and is_input):
 
         cfg.reset_flag = 0
         cfg.bar_flag = 1
@@ -422,21 +421,19 @@ def get_font(text_rgb, bg_rgb):
 
 def bar_add():
     DEF = '\x1b[0m'
-    FC_DEF = '\x1b[39m'
-    BC_DEF = '\x1b[49m'
 
     atk = get_font((255, 255, 255), (255, 0, 0))
     partner_atk = get_font((255, 255, 255), (255, 128, 0))
     mot = get_font((255, 255, 255), (65, 200, 0))
-    grd_stun = get_font((255, 255, 255), (140, 140, 140))
+    grd_stun = get_font((255, 255, 255), (170, 170, 170))
     hit_stun = get_font((255, 255, 255), (140, 140, 140))
+    thrown = get_font((255, 255, 255), (110, 110, 110))
     fre = get_font((92, 92, 92), (0, 0, 0))
     jmp = get_font((177, 177, 177), (241, 224, 132))
     seeld = get_font((255, 255, 255), (145, 194, 255))
     inv = get_font((180, 180, 180), (255, 255, 255))
     adv = get_font((255, 255, 255), (0, 0, 0))
     bunker = get_font((255, 255, 255), (225, 184, 0))
-    throw_number = [350]  # 投げやられ
     a_font = get_font((255, 143, 169), (170, 27, 58))
     b_font = get_font((255, 255, 137), (169, 91, 7))
     c_font = get_font((143, 255, 195), (18, 132, 62))
@@ -464,8 +461,6 @@ def bar_add():
         19,  # 空中ガード
     ]
 
-    ignore_number = [0, 10, 11, 12, 13, 14, 15, 20, 16, 594]
-
     jmp_number = [34, 35, 36, 37]
     
     player_num = 0
@@ -476,31 +471,26 @@ def bar_add():
         if n.motion.num != 0:
             num = str(n.motion.num)
             font = mot
-            for list_a in jmp_number:  # ジャンプ移行中
-                if n.pattern.num == list_a:
-                    font = jmp
-                    break
+            
+            if n.pattern.num in jmp_number:
+                font = jmp
 
-            for list_a in hit_number:  # ヒット中
-                if n.pattern.num == list_a:
-                    font = hit_stun
-                    if n.st_sac.num != 1:  # 地上にいる場合
-                        if (n.hitstun.num - 1) > 0:
-                            num = str(n.hitstun.num - 1)
-                    elif n.st_sac.num == 1:  # 空中にいる場合:
-                        if (n.untechend.num - n.untech.num) > 0:
-                            num = str(n.untechend.num - n.untech.num)
-                    break
+            elif n.pattern.num in hit_number:
+                font = hit_stun
+                if n.st_sac.num != 1:  #grounded
+                    if (n.hitstun.num - 1) > 0:
+                        num = str(n.hitstun.num - 1)
+                elif n.st_sac.num == 1:  #airborne
+                    if (n.untechend.num - n.untech.num) > 0:
+                        num = str(n.untechend.num - n.untech.num)
 
-            for list_a in grd_number:  # ガード中
-                if n.pattern.num == list_a:
-                    font = grd_stun
-                    if n.st_sac.num != 1:  # 地上にいる場合
-                            if (n.hitstun.num - 1) > 0:
-                                num = str(n.hitstun.num - 1)
-                            else:
-                                num = "0"
-                    break
+            elif n.pattern.num in grd_number:
+                font = grd_stun
+                if n.st_sac.num != 1:  #grounded
+                    if (n.hitstun.num - 1) > 0:
+                        num = str(n.hitstun.num - 1)
+                    else:
+                        num = "P"
 
         elif n.motion.num == 0:
             num = str(n.pattern.num)
@@ -512,7 +502,8 @@ def bar_add():
                     num = str(abs(cfg.advantage_f))
 
         if n.pattern.num == 350:  # 投げやられ
-            font = hit_stun
+            font = thrown
+            num = "T"
 
         elif n.anim_box.num == 12:  # バンカー　or 相殺
             font = bunker
@@ -652,6 +643,7 @@ def bar_ini():
         m.barlist_4 = [""] * cfg.mem_range
         m.barlist_5 = [""] * cfg.mem_range
 
+
 def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
     
@@ -659,10 +651,9 @@ def view():
     x_p2 = str(cfg.p2.x_posi.num).rjust(6, " ")
     xp_p1 = str(math.floor(cfg.p1.x_posi.num/128)).rjust(6, " ")
     xp_p2 = str(math.floor(cfg.p2.x_posi.num/128)).rjust(6, " ")
+    
     xspd_p1_math = cfg.p1.x_spd.num
     xspd_p2_math = cfg.p2.x_spd.num
-    xspd_p1 = str(xspd_p1_math).rjust(6, " ")
-    xspd_p2 = str(xspd_p2_math).rjust(6, " ")
     xacc_p1 = str(cfg.p1.x_acc.num).rjust(6, " ")
     xacc_p2 = str(cfg.p2.x_acc.num).rjust(6, " ")
     
@@ -675,6 +666,7 @@ def view():
     y_p2 = str(cfg.p2.y_posi1.num).rjust(6, " ")    
     yp_p1 = str(math.floor(cfg.p1.y_posi1.num/128)).rjust(6, " ")
     yp_p2 = str(math.floor(cfg.p2.y_posi1.num/128)).rjust(6, " ")
+    
     yspd_p1 = str(cfg.p1.y_spd.num).rjust(6, " ")
     yspd_p2 = str(cfg.p2.y_spd.num).rjust(6, " ")
     yacc_p1 = str(cfg.p1.y_acc.num).rjust(6, " ")

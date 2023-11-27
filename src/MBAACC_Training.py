@@ -75,12 +75,14 @@ def function_key():
         sub.situationReset()
 
     elif keyboard.is_pressed("right") and cfg.bar_offset > 0:
-        cfg.bar_offset_f -= 0.15
-        cfg.bar_offset = round(cfg.bar_offset_f)
+        if (time.time() - cfg.last_key_time > 0.05):
+            cfg.bar_offset -= 1
+            cfg.last_key_time = time.time()
     
     elif keyboard.is_pressed("left") and cfg.bar_offset < cfg.bar_num - 81:
-        cfg.bar_offset_f += 0.15
-        cfg.bar_offset = round(cfg.bar_offset_f)
+        if (time.time() - cfg.last_key_time > 0.05):
+            cfg.bar_offset += 1
+            cfg.last_key_time = time.time()
 
     # デバッグ表示
     elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
