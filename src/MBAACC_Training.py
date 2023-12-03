@@ -23,7 +23,6 @@ num_saves = 4
 is_saved = [0] * num_saves
 save_to_load = 0
 flag1 = 0
-start_time = time.time()
 framestep = 0
 
 
@@ -151,8 +150,6 @@ while 1:
         sub.view_st()
 
         if cfg.f_timer == 1:
-            #sub.bar_ini()
-            
             for i in range(0, num_saves):
                 if save_to_load == i and is_saved[i] == 1:
                     sub.sitWrite(i)

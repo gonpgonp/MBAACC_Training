@@ -138,7 +138,6 @@ bar_flag = 0
 bar_num = 0
 bar_ini_flag = 0
 bar_ini_flag2 = 0
-st_Bar = ""
 bar_offset = 0
 last_key_time = 0
 
@@ -151,6 +150,5 @@ interval = 41
 interval2 = 80
 interval_time = 0
 reset_flag = 0
-temp = create_string_buffer(4)
 debug_flag = 0
 extra_save = 1

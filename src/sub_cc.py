@@ -302,7 +302,6 @@ def view_st():
             cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or
             cfg.p3.atk_st_pointer.num != 0 or cfg.p4.atk_st_pointer.num != 0 or
             cfg.debug_flag == 1 and is_input):
-
         cfg.reset_flag = 0
         cfg.bar_flag = 1
         cfg.interval = 0
@@ -422,23 +421,23 @@ def get_font(text_rgb, bg_rgb):
 def bar_add():
     DEF = '\x1b[0m'
 
-    atk = get_font((255, 255, 255), (255, 0, 0))
-    partner_atk = get_font((255, 255, 255), (255, 128, 0))
-    mot = get_font((255, 255, 255), (65, 200, 0))
-    grd_stun = get_font((255, 255, 255), (170, 170, 170))
-    hit_stun = get_font((255, 255, 255), (140, 140, 140))
-    thrown = get_font((255, 255, 255), (110, 110, 110))
-    fre = get_font((92, 92, 92), (0, 0, 0))
-    jmp = get_font((177, 177, 177), (241, 224, 132))
-    seeld = get_font((255, 255, 255), (145, 194, 255))
-    inv = get_font((180, 180, 180), (255, 255, 255))
-    adv = get_font((255, 255, 255), (0, 0, 0))
-    bunker = get_font((255, 255, 255), (225, 184, 0))
-    a_font = get_font((255, 143, 169), (170, 27, 58))
-    b_font = get_font((255, 255, 137), (169, 91, 7))
-    c_font = get_font((143, 255, 195), (18, 132, 62))
-    d_font = get_font((137, 255, 255), (21, 66, 161))
-    freeze = get_font((255, 255, 255), (60, 60, 60))
+    atk =           get_font((255, 255, 255), (255,   0,   0))
+    partner_atk =   get_font((255, 255, 255), (255, 128,   0))
+    mot =           get_font((255, 255, 255), ( 65, 200,   0))
+    grd_stun =      get_font((255, 255, 255), (170, 170, 170))
+    hit_stun =      get_font((255, 255, 255), (140, 140, 140))
+    thrown =        get_font((255, 255, 255), (110, 110, 110))
+    fre =           get_font(( 92,  92,  92), (  0,   0,   0))
+    jmp =           get_font((177, 177, 177), (241, 224, 132))
+    seeld =         get_font((255, 255, 255), (145, 194, 255))
+    inv =           get_font((180, 180, 180), (255, 255, 255))
+    adv =           get_font((255, 255, 255), (  0,   0,   0))
+    bunker =        get_font((255, 255, 255), (225, 184,   0))
+    a_font =        get_font((255, 143, 169), (170,  27,  58))
+    b_font =        get_font((255, 255, 137), (169,  91,   7))
+    c_font =        get_font((143, 255, 195), ( 18, 132,  62))
+    d_font =        get_font((137, 255, 255), ( 21,  66, 161))
+    freeze =        get_font((255, 255, 255), ( 60,  60,  60))
 
     hit_number = [
         26,  # 立吹っ飛び
@@ -643,9 +642,18 @@ def bar_ini():
         m.barlist_4 = [""] * cfg.mem_range
         m.barlist_5 = [""] * cfg.mem_range
 
-
 def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
+    
+    column_headers =  "\x1b[4m"
+    for i in range(1,81):
+        if i < 10:
+            column_headers += " "
+        column_headers += str(i)
+        if i % 2 == 1:
+            column_headers += "\x1b[4;48;5;238m"
+        else:
+            column_headers += "\x1b[0;4m"
     
     x_p1 = str(cfg.p1.x_posi.num).rjust(6, " ")
     x_p2 = str(cfg.p2.x_posi.num).rjust(6, " ")
@@ -699,7 +707,7 @@ def view():
     if cfg.bar_num <= 80:
         start = 0
     else:
-        start = cfg.bar_num - 80 - cfg.bar_offset
+        start = cfg.bar_num - 79 - cfg.bar_offset
     
     r = range(start, start + 80)
 
@@ -722,43 +730,31 @@ def view():
 
     state_str = '\x1b[1;1H' + '\x1b[?25l'
 
-    state_str += f'1P|({x_p1},'
-    state_str += f' {y_p1})'
+    state_str += f'1P|({x_p1}, {y_p1})'
     state_str += f' |Pattern{pat1}'
     state_str += f' |Frame{st1}'
     state_str += f' |Health{health_p1}'
     state_str += f' |Circuit{circuit_p1}'
 
     if keyboard.is_pressed("F1"):
-        f1 = '  \x1b[007m' + '[F1]Reset' + '\x1b[0m'
+        f1 = '\x1b[007m' + '[F1]Reset' + '\x1b[0m'
     else:
-        f1 = '  [F1]Reset'
+        f1 = '[F1]Reset'
 
     if keyboard.is_pressed("F2"):
-        f2 = '  \x1b[007m' + '[F2]Save state' + '\x1b[0m'
+        f2 = '\x1b[007m' + '[F2]Save state' + '\x1b[0m'
     else:
-        f2 = '  [F2]Save state'
+        f2 = '[F2]Save state'
 
     if keyboard.is_pressed("F6"):
-        f6 = '  \x1b[007m' + '[F6]Load state' + '\x1b[0m'
+        f6 = '\x1b[007m' + '[F6]Load state' + '\x1b[0m'
     else:
-        f6 = '  [F6]Load state'
+        f6 = '[F6]Load state'
 
-    if keyboard.is_pressed("F7"):
-        f7 = '    \x1b[007m' + f'[F7]Save state {cfg.extra_save}' + '\x1b[0m'
-    else:
-        f7 = f'    [F7]Save state {cfg.extra_save}'
-
-    if keyboard.is_pressed("F8"):
-        f8 = '  \x1b[007m' + f'[F8]Load state {cfg.extra_save}' + '\x1b[0m'
-    else:
-        f8 = f'  [F8]Load state {cfg.extra_save}'
-
-    state_str += '   ' + f1 + '       ' + f2 + '  ' + f6 + END
+    state_str += '   ' + f1.ljust(18, " ") + f2.ljust(18, " ") + f6.ljust(18, " ") + END
     
     state_str += "\x1b[4m"
-    state_str += f'  |({xp_p1},'
-    state_str += f' {yp_p1})'
+    state_str += f'  |({xp_p1}, {yp_p1})'
     state_str += f' |X-Speed{xspdfinal_p1}'
     state_str += f' |X-Accel{xacc_p1}'
     state_str += f' |Y-Speed{yspd_p1}'
@@ -766,23 +762,31 @@ def view():
     state_str += "\x1b[4m"
     state_str += END
 
-    state_str += f'2P|({x_p2},'
-    state_str += f' {y_p2})'
+    state_str += f'2P|({x_p2}, {y_p2})'
     state_str += f' |Pattern{pat2}'
     state_str += f' |Frame{st2}'
     state_str += f' |Health{health_p2}'
     state_str += f' |Circuit{circuit_p2}'
     
     if keyboard.is_pressed(",") and keyboard.is_pressed("."):
-        debughotkeys = '  \x1b[007m' + '[,.]Extra Info' + '\x1b[0m'
+        debughotkeys = '\x1b[007m' + '[,.]Extra Info' + '\x1b[0m'
     else:
-        debughotkeys = '  [,.]Extra Info'
-    
-    state_str += '   ' + debughotkeys + f7 + f8 + END
+        debughotkeys = '[,.]Extra Info'
+
+    if keyboard.is_pressed("F7"):
+        f7 = '\x1b[007m' + f'[F7]Save state {cfg.extra_save}' + '\x1b[0m'
+    else:
+        f7 = f'[F7]Save state {cfg.extra_save}'
+
+    if keyboard.is_pressed("F8"):
+        f8 = '\x1b[007m' + f'[F8]Load state {cfg.extra_save}' + '\x1b[0m'
+    else:
+        f8 = f'[F8]Load state {cfg.extra_save}'
+
+    state_str += '   ' + debughotkeys.ljust(18, " ") + f7.ljust(18, " ") + f8.ljust(18, " ") + END
     
     state_str += "\x1b[4m"
-    state_str += f'  |({xp_p2},'
-    state_str += f' {yp_p2})'
+    state_str += f'  |({xp_p2}, {yp_p2})'
     state_str += f' |X-Speed{xspdfinal_p2}'
     state_str += f' |X-Accel{xacc_p2}'
     state_str += f' |Y-Speed{yspd_p2}'
@@ -791,21 +795,10 @@ def view():
     state_str += END
 
     state_str += '  |Advantage' + advantage_f
-    state_str += '  Range ' + trange.rjust(7, " ")
-    state_str += ' P-Range ' + prange.rjust(5, " ") + END
+    state_str += '  |Range ' + trange.rjust(7, " ")
+    state_str += ' |P-Range ' + prange.rjust(5, " ") + END
 
-    tempstr = "\x1b[4m"
-    for i in range(1,81):
-        if i < 10:
-            tempstr += " "
-        tempstr += str(i)
-        if i % 2 == 1:
-            tempstr += "\x1b[4;48;5;238m"
-        else:
-            tempstr += "\x1b[0;4m"
-
-
-    state_str += '  |' + tempstr + END
+    state_str += '  |' + column_headers + END
     state_str += '1P|' + cfg.p1.Bar_1 + END
     state_str += '  |' + cfg.p1.Bar_2 + END
     state_str += '  |' + cfg.p1.Bar_5 + END
@@ -814,24 +807,25 @@ def view():
     state_str += '  |' + cfg.p2.Bar_5 + END
 
     if cfg.debug_flag == 1:
-        state_str = degug_view(state_str)
+        state_str += degug_view()
 
     print(state_str)
 
 
-def degug_view(state_str):
+def degug_view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
-    tempstr = "\x1b[4m"
+    
+    column_headers =  "\x1b[4m"
     for i in range(1,81):
         if i < 10:
-            tempstr += " "
-        tempstr += str(i)
+            column_headers += " "
+        column_headers += str(i)
         if i % 2 == 1:
-            tempstr += "\x1b[4;48;5;238m"
+            column_headers += "\x1b[4;48;5;238m"
         else:
-            tempstr += "\x1b[0;4m"
+            column_headers += "\x1b[0;4m"
 
-    debug_str_3 = '  |' + tempstr
+    debug_str_3 = '  |' + column_headers
     
     if (cfg.p1.anten_stop.num > 0):
         exflash_p1 = str(cfg.p1.anten_stop.num).rjust(4, " ")
@@ -906,6 +900,7 @@ def degug_view(state_str):
     debug_str_p1 += f" |Partner{partner_mot_p1} ({partner_pf_p1})"
     debug_str_p2 += f" |Partner{partner_mot_p2} ({partner_pf_p2})"
 
+    state_str = ""
     state_str += debug_str_p1 + END
     state_str += debug_str_p2 + END
     state_str += "\x1b[4m"
