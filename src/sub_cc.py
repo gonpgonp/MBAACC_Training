@@ -171,6 +171,8 @@ def situationCheck():
         #Meters
         para_get(n.health)
         para_get(n.rhealth)
+        para_get_f(n.gg)
+        para_get_f(n.gq)
         para_get(n.circuit)
         
         #Movement
@@ -704,7 +706,7 @@ def view():
         n.Bar_5 = ""
 
     
-    if cfg.bar_num <= 80:
+    if cfg.bar_num < 80:
         start = 0
     else:
         start = cfg.bar_num - 79 - cfg.bar_offset
@@ -840,11 +842,6 @@ def degug_view():
     hitstop_p1 = str(cfg.p1.hitstop.num).rjust(4, " ")
     hitstop_p2 = str(cfg.p2.hitstop.num).rjust(4, " ")
     
-    debug_str_p1 = f"1P|EX Flash{exflash_p1}"
-    debug_str_p2 = f"2P|EX Flash{exflash_p2}"
-    debug_str_p1 += f" |Hitstop{hitstop_p1}"
-    debug_str_p2 += f" |Hitstop{hitstop_p2}"
-    
     if(cfg.p1.chstate.num == 2):
         ch_p1 = "Low".rjust(6, " ")
     elif(cfg.p1.chstate.num == 1):
@@ -858,15 +855,16 @@ def degug_view():
         ch_p2 = "High".rjust(6, " ")
     else:
         ch_p2 = "None".rjust(6, " ")
-        
-    debug_str_p1 += f" |Counter{ch_p1}"
-    debug_str_p2 += f" |Counter{ch_p2}"
+    
+    gg_p1 = str(round(cfg.p1.gg.num)).rjust(5, " ")
+    gg_p2 = str(round(cfg.p2.gg.num)).rjust(5, " ")
+    gq_p1 = round(cfg.p1.gq.num, 3)
+    gq_p2 = round(cfg.p2.gq.num, 3)
+    gq_p1 = f"{gq_p1:.3f}"
+    gq_p2 = f"{gq_p2:.3f}"
     
     rhealth_p1 = str(cfg.p1.rhealth.num-cfg.p1.health.num).rjust(6, " ")
     rhealth_p2 = str(cfg.p2.rhealth.num-cfg.p2.health.num).rjust(6, " ")
-    
-    debug_str_p1 += f" |Red Health{rhealth_p1}"
-    debug_str_p2 += f" |Red Health{rhealth_p2}"
     
     gravity_p1 = cfg.p1.grav.num
     gravity_p1 = max(0, round((gravity_p1 - 0.072) / 0.008))
@@ -888,17 +886,26 @@ def degug_view():
 
     grav_hits_p2 = str(round(cfg.p2.grav.num / 0.008)).rjust(3, " ")
     
-    debug_str_p1 += f" |Penalty{grav_hits_p1} ({gravity_p1} + {extra_grav_p1})"
-    debug_str_p2 += f" |Penalty{grav_hits_p2} ({gravity_p2} + {extra_grav_p2})"
-    
     partner_mot_p1 = str(cfg.p3.pattern.num).rjust(4, " ")
     partner_pf_p1 = str(cfg.p3.state.num).rjust(3, " ")
     
     partner_mot_p2 = str(cfg.p4.pattern.num).rjust(4, " ")
     partner_pf_p2 = str(cfg.p4.state.num).rjust(3, " ")
     
-    debug_str_p1 += f" |Partner{partner_mot_p1} ({partner_pf_p1})"
-    debug_str_p2 += f" |Partner{partner_mot_p2} ({partner_pf_p2})"
+    debug_str_p1 = f"1P|EX Flash{exflash_p1}"
+    debug_str_p2 = f"2P|EX Flash{exflash_p2}"
+    debug_str_p1 += f" |Hitstop{hitstop_p1}"
+    debug_str_p2 += f" |Hitstop{hitstop_p2}"
+    debug_str_p1 += f" |Counter{ch_p1}"
+    debug_str_p2 += f" |Counter{ch_p2}"
+    debug_str_p1 += f" |Guard{gg_p1} [{gq_p1}]"
+    debug_str_p2 += f" |Guard{gg_p2} [{gq_p2}]"
+    debug_str_p1 += f" |Red Health{rhealth_p1}"
+    debug_str_p2 += f" |Red Health{rhealth_p2}"
+    debug_str_p1 += f" |Scaling{grav_hits_p1} [{gravity_p1},{extra_grav_p1}]"
+    debug_str_p2 += f" |Scaling{grav_hits_p2} [{gravity_p2},{extra_grav_p2}]"
+    debug_str_p1 += f" |Partner{partner_mot_p1} [{partner_pf_p1}]"
+    debug_str_p2 += f" |Partner{partner_mot_p2} [{partner_pf_p2}]"
 
     state_str = ""
     state_str += debug_str_p1 + END

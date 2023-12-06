@@ -22,6 +22,8 @@ class Character_info:
         #Meters
         self.health = para(4)
         self.rhealth = para(4)
+        self.gg = para(4)
+        self.gq = para(4)
         self.circuit = para(4)
         
         #Movement

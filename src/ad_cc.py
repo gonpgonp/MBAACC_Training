@@ -70,6 +70,8 @@ for n in P_info:
     #Meters
     n.health.ad =       loop_address + 0xBC
     n.rhealth.ad =      loop_address + 0xC0
+    n.gg.ad =           loop_address + 0xC4
+    n.gq.ad =           loop_address + 0xD8
     n.circuit.ad =      loop_address + 0xE0
     
     #Movement
