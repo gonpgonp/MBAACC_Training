@@ -1,5 +1,4 @@
 from ctypes import create_string_buffer
-Bar80_flag = 0
 bar_range = 80
 mem_range = 400
 
@@ -48,9 +47,11 @@ class Character_info:
         self.utpen = para(2)
         
         #Inputs
-        self.dir_input = para(1)
+        self.air_dinput = para(1)
+        self.raw_dinput = para(1)
         self.button_input = para(1)
         self.macro_input = para(1)
+        self.on_right = para(1)
         
         #Pointers
         self.pat_st_pointer = para(4)
@@ -69,6 +70,7 @@ class Character_info:
         self.motion = para(4)
         
         self.active = 0
+        self.last_on_right = 0
         
         self.Bar_1 = ''
         self.Bar_2 = ''
@@ -148,8 +150,7 @@ anten = 0
 anten_flag = 0
 advantage_f = 0
 hitstop = 0
-interval = 41
-interval2 = 80
+interval = 0
 interval_time = 0
 reset_flag = 0
 debug_flag = 0

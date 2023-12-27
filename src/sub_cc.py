@@ -197,9 +197,11 @@ def situationCheck():
         para_get(n.utpen)
 
         #Inputs
-        para_get(n.dir_input)
+        para_get(n.air_dinput)
+        para_get(n.raw_dinput)
         para_get(n.button_input)
         para_get(n.macro_input)
+        para_get(n.on_right)
 
         #Pointers
         para_get(n.anim_st_pointer)
@@ -295,7 +297,7 @@ def sitWrite(n):
 def view_st():
     advantage_calc()
     
-    is_input = (cfg.p1.dir_input.num != 0 or cfg.p2.dir_input.num != 0 or
+    is_input = (cfg.p1.raw_dinput.num != 0 or cfg.p2.raw_dinput.num != 0 or
     cfg.p1.button_input.num != 0 or cfg.p2.button_input.num != 0 or
     cfg.p1.macro_input.num != 0 or cfg.p2.macro_input.num != 0)
     
@@ -343,8 +345,6 @@ def view_st():
                     m.barlist_3 = m.barlist_3[1:] + [""]
                     m.barlist_4 = m.barlist_4[1:] + [""]
                     m.barlist_5 = m.barlist_5[1:] + [""]
-                #cfg.bar_num = 0
-                cfg.Bar80_flag = 1
 
         # バー追加処理
         bar_add()
@@ -372,7 +372,7 @@ def advantage_calc():
 def determineReset():
     bar_ini_flag = 0
 
-    if cfg.bar_num > 80:
+    if cfg.bar_num >= 80:
         cfg.interval_time = 20
 
     # インターバル後の初期化
@@ -570,10 +570,18 @@ def bar_add():
 
         #Bar 4
         bar4 = ""
-        num = n.dir_input.num
-        num = str(num).rjust(2, " ")[-2:]
-        if num == " 0":
-            num = " ."
+        rev_input = [0, 3, 2, 1, 6, 0, 4, 9, 8, 7]
+        if n.st_sac.num == 1:
+            num = n.air_dinput.num
+        elif n.on_right.num == 1:
+            num = rev_input[n.raw_dinput.num]
+        else:
+            num = n.raw_dinput.num
+        
+        if num == 0:
+            num = " ·"
+        else:
+            num = f" {num}"
         
         if ((n.button_input.num & 64) > 0):
             font = c_font
@@ -581,7 +589,12 @@ def bar_add():
             font = hit_stun
         else:
             font = DEF
+        
+        if (n.on_right.num != n.last_on_right) and cfg.bar_num != 0:
+            font += "\x1b[4m"
+        
         bar4 += font + num[0] + DEF
+        n.last_on_right = n.on_right.num
         font = DEF
         
         if ((n.button_input.num & 128) > 0):
@@ -631,9 +644,7 @@ def bar_ini():
 
     cfg.bar_num = 0
     cfg.interval = 0
-    cfg.interval2 = 0
     cfg.bar_ini_flag2 = 0
-    cfg.Bar80_flag = 0
     cfg.interval_time = 80
     cfg.bar_offset = 0
 
@@ -739,21 +750,21 @@ def view():
     state_str += f' |Circuit{circuit_p1}'
 
     if keyboard.is_pressed("F1"):
-        f1 = '\x1b[007m' + '[F1]Reset' + '\x1b[0m'
+        f1 = '\x1b[007m' + '[F1]Reset' + '\x1b[0m         '
     else:
-        f1 = '[F1]Reset'
+        f1 = '[F1]Reset         '
 
     if keyboard.is_pressed("F2"):
-        f2 = '\x1b[007m' + '[F2]Save state' + '\x1b[0m'
+        f2 = '\x1b[007m' + '[F2]Save state' + '\x1b[0m    '
     else:
-        f2 = '[F2]Save state'
+        f2 = '[F2]Save state    '
 
     if keyboard.is_pressed("F6"):
-        f6 = '\x1b[007m' + '[F6]Load state' + '\x1b[0m'
+        f6 = '\x1b[007m' + '[F6]Load state' + '\x1b[0m    '
     else:
-        f6 = '[F6]Load state'
+        f6 = '[F6]Load state    '
 
-    state_str += '   ' + f1.ljust(18, " ") + f2.ljust(18, " ") + f6.ljust(18, " ") + END
+    state_str += '   ' + f1 + f2 + f6 + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p1}, {yp_p1})'
@@ -771,21 +782,21 @@ def view():
     state_str += f' |Circuit{circuit_p2}'
     
     if keyboard.is_pressed(",") and keyboard.is_pressed("."):
-        debughotkeys = '\x1b[007m' + '[,.]Extra Info' + '\x1b[0m'
+        debughotkeys = '\x1b[007m' + '[,.]Extra Info' + '\x1b[0m    '
     else:
-        debughotkeys = '[,.]Extra Info'
+        debughotkeys = '[,.]Extra Info    '
 
     if keyboard.is_pressed("F7"):
-        f7 = '\x1b[007m' + f'[F7]Save state {cfg.extra_save}' + '\x1b[0m'
+        f7 = '\x1b[007m' + f'[F7]Save state {cfg.extra_save}' + '\x1b[0m  '
     else:
-        f7 = f'[F7]Save state {cfg.extra_save}'
+        f7 = f'[F7]Save state {cfg.extra_save}  '
 
     if keyboard.is_pressed("F8"):
-        f8 = '\x1b[007m' + f'[F8]Load state {cfg.extra_save}' + '\x1b[0m'
+        f8 = '\x1b[007m' + f'[F8]Load state {cfg.extra_save}' + '\x1b[0m  '
     else:
-        f8 = f'[F8]Load state {cfg.extra_save}'
+        f8 = f'[F8]Load state {cfg.extra_save}  '
 
-    state_str += '   ' + debughotkeys.ljust(18, " ") + f7.ljust(18, " ") + f8.ljust(18, " ") + END
+    state_str += '   ' + debughotkeys + f7 + f8 + END
     
     state_str += "\x1b[4m"
     state_str += f'  |({xp_p2}, {yp_p2})'

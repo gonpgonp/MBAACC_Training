@@ -96,9 +96,11 @@ for n in P_info:
     n.utpen.ad =        loop_address + 0x2E8
     
     #Inputs
-    n.dir_input.ad =    loop_address + 0x2EA
+    n.air_dinput.ad =   loop_address + 0x2EA
+    n.raw_dinput.ad =   loop_address + 0x2EB
     n.button_input.ad = loop_address + 0x2ED
     n.macro_input.ad =  loop_address + 0x2EE
+    n.on_right.ad =     loop_address + 0x315
     
     #Pointers
     n.pat_st_pointer.ad =   loop_address + 0x31C
