@@ -149,10 +149,12 @@ bar_ini_flag2 = 0
 bar_offset = 0
 last_key_time = 0
 
-DataFlag1 = 1
+adv_flag = 1
 anten = 0
 anten_flag = 0
 advantage_f = 0
+p1_adv = 0
+p2_adv = 0
 hitstop = 0
 interval = 0
 interval_time = 0

@@ -86,9 +86,6 @@ def function_key():
     elif keyboard.is_pressed("3"):
         cfg.save_slot = 2
         save_to_load = 2
-
-    elif keyboard.is_pressed("4"):
-        print(save_cc.S_info[0].contl_flag.ad)
     
     elif lock_input:
         lock_input = False

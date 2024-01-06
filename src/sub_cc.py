@@ -422,24 +422,24 @@ def view_st():
 
 def advantage_calc():
     if cfg.p1.motion.num == 0 and cfg.p2.motion.num == 0:
-        cfg.DataFlag1 = 0
+        cfg.adv_flag = 0
 
     if cfg.p1.motion.num != 0 and cfg.p2.motion.num != 0:
-        cfg.DataFlag1 = 1
-        cfg.advantage_f = 0
+        cfg.adv_flag = 1
+        cfg.p1_adv = 0
+        cfg.p2_adv = 0
 
-    if cfg.DataFlag1 == 1:
-
+    if cfg.adv_flag == 1:
         # 有利フレーム検証
         if (cfg.p1.motion.num == 0 and cfg.p2.motion.num != 0 and
                 cfg.stop.num == 0 and cfg.p2.last_motion != cfg.p2.motion.num):
-            cfg.advantage_f += 1
+            cfg.p1_adv += 1
             cfg.p2.last_motion = cfg.p2.motion.num
 
         # 不利フレーム検証
         if (cfg.p1.motion.num != 0 and cfg.p2.motion.num == 0 and
                 cfg.stop.num == 0 and cfg.p1.last_motion != cfg.p1.motion.num):
-            cfg.advantage_f -= 1
+            cfg.p2_adv += 1
             cfg.p1.last_motion = cfg.p1.motion.num
 
 
@@ -473,9 +473,9 @@ def stop_flame_calc():
         cfg.anten = 0
 
     # ヒットストップ処理
-    if (cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0):
+    if cfg.p1.hitstop.num != 0 and cfg.p2.hitstop.num != 0:
         cfg.hitstop += 1
-    elif (cfg.p1.hitstop.num == 0 or cfg.p2.hitstop.num == 0):
+    elif cfg.p1.hitstop.num == 0 or cfg.p2.hitstop.num == 0:
         cfg.hitstop = 0
 
 
@@ -573,10 +573,13 @@ def bar_add():
             num = str(n.pattern.num)
             font = fre
 
-            if cfg.DataFlag1 == 1:
-                if n == cfg.p_info[0] or n == cfg.p_info[1]:
+            if cfg.adv_flag == 1:
+                if player_num == 0:
                     font = adv
-                    num = str(abs(cfg.advantage_f))
+                    num = str(cfg.p1_adv)
+                elif player_num == 1:
+                    font = adv
+                    num = str(cfg.p2_adv)
 
         if n.pattern.num == 350:  # 投げやられ
             font = thrown
@@ -597,10 +600,10 @@ def bar_add():
             font = hit_stop
 
         n.barlist_1[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        num = ""
+        font = ""
 
         #Bar 2
-        font = ""
-        num = ""
         
         if n.st_sac.num == 1:  # 空中にいる場合:
             num = "^"
@@ -622,6 +625,8 @@ def bar_add():
 
 
         n.barlist_2[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        num = ""
+        font = ""
         
         #Bar 3
         bar3 = ""
@@ -678,7 +683,6 @@ def bar_add():
         
         bar4 += font + num[0] + DEF
         n.last_on_right = n.on_right.num
-        font = DEF
         
         if ((n.button_input.num & 128) > 0):
             font = d_font
@@ -688,10 +692,10 @@ def bar_add():
             font = DEF
         bar4 += font + num[1] + DEF
         n.barlist_4[cfg.bar_num] = bar4
-        
-        #Bar5
         num = ""
         font = ""
+        
+        #Bar5
         
         count = 0
         
@@ -715,6 +719,8 @@ def bar_add():
                 num = str(cfg.p_info[player_num + 2].active)
         
         n.barlist_5[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        num = ""
+        font = ""
         
         player_num += 1
 
