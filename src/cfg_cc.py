@@ -2,11 +2,13 @@ from ctypes import create_string_buffer
 bar_range = 80
 mem_range = 400
 
+
 class para:
     def __init__(self, byte_len):
         self.ad = 0x00
         self.num = 0
         self.b_dat = create_string_buffer(byte_len)
+
 
 class Character_info:
     def __init__(self):
@@ -26,9 +28,8 @@ class Character_info:
         self.circuit = para(4)
         
         #Movement
-        self.x_posi = para(4)
-        self.y_posi1 = para(4)
-        self.y_posi2 = para(4)
+        self.x_pos = para(4)
+        self.y_pos = para(4)
         self.x_spd = para(4)
         self.y_spd = para(4)
         self.x_acc = para(2)
@@ -68,7 +69,8 @@ class Character_info:
         self.tag_flag = para(1)
         self.anten_stop = para(1)
         self.motion = para(4)
-        
+
+        self.last_motion = 0
         self.active = 0
         self.last_on_right = 0
         
@@ -91,10 +93,12 @@ class Actor_info:
         self.state = para(4)
         
         #Others
+        self.hitstop = para(1)
         self.owner = para(1)
         
         #Pointers
         self.atk_st_pointer = para(4)
+
 
 P_info = [Character_info(), Character_info(), Character_info(), Character_info()]
 p_info = [Character_info(), Character_info(), Character_info(), Character_info()]
@@ -153,5 +157,6 @@ hitstop = 0
 interval = 0
 interval_time = 0
 reset_flag = 0
-debug_flag = 0
-extra_save = 1
+debug_flag = False
+save_slot = 0
+use_arrows = False

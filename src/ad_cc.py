@@ -42,7 +42,7 @@ STOP_SITUATION_AD = 0x158600  # 停止状況データ開始位置
 DAMAGE_AD = 0x157DD8  # ダメージアドレス開始位置
 DAMAGE2_AD = 0x157E10  # ダメージアドレス開始位置
 CONTL_FLAG_AD = 0x157DB8  # 操作フラグ
-CONTL_FLAG2_AD = 0x157DBc  # 操作フラグ
+CONTL_FLAG2_AD = 0x157DBC  # 操作フラグ
 
 for m in S_info:
     m.obj.ad = OBJ_AD
@@ -55,7 +55,7 @@ for m in S_info:
     m.cam1_y.ad = CAM1_Y_AD
     m.cam2_y.ad = CAM2_Y_AD
     m.contl_flag.ad = CONTL_FLAG_AD
-    m.contl_flag2.ad = CONTL_FLAG_AD
+    m.contl_flag2.ad = CONTL_FLAG2_AD
 
 loop_address = PLR_STRUCT_BASE_ADDRESS
 for n in P_info:
@@ -75,9 +75,8 @@ for n in P_info:
     n.circuit.ad =      loop_address + 0xE0
     
     #Movement
-    n.x_posi.ad =       loop_address + 0x108
-    n.y_posi1.ad =      loop_address + 0x10C
-    n.y_posi2.ad =      loop_address + 0x118
+    n.x_pos.ad =        loop_address + 0x108
+    n.y_pos.ad =        loop_address + 0x10C
     n.x_spd.ad =        loop_address + 0x11C
     n.y_spd.ad =        loop_address + 0x120
     n.x_acc.ad =        loop_address + 0x124
@@ -115,10 +114,11 @@ for o in A_info:
     o.exist.ad =            loop_address_2 + 0x00
     o.pattern.ad =          loop_address_2 + 0x10
     o.state.ad =            loop_address_2 + 0x14
-    
+
     #Others
+    o.hitstop.ad =          loop_address_2 + 0x172
     o.owner.ad =            loop_address_2 + 0x2F4
-    
+
     #Pointers
     o.atk_st_pointer.ad =   loop_address_2 + 0x324
     

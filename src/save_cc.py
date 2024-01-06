@@ -1,4 +1,3 @@
-from ctypes import create_string_buffer
 import cfg_cc
 cfg = cfg_cc
 
@@ -15,7 +14,11 @@ class Save_info:
         self.cam2_y = cfg.para(4)
         self.contl_flag = cfg.para(4)
         self.contl_flag2 = cfg.para(4)
-        
-        self.P_info = []
 
-S_info = [Save_info(), Save_info(), Save_info(), Save_info()]
+        self.active1 = 0
+        self.active2 = 0
+        self.active3 = 0
+        self.active4 = 0
+
+
+S_info = [Save_info(), Save_info(), Save_info()]
