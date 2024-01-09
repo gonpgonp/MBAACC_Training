@@ -1,3 +1,4 @@
+import os
 from ctypes import create_string_buffer
 bar_range = 80
 mem_range = 400
@@ -26,6 +27,7 @@ class Character_info:
         self.gg = para(4)
         self.gq = para(4)
         self.circuit = para(4)
+        self.f_count = para(4)
         
         #Movement
         self.x_pos = para(4)
@@ -70,7 +72,7 @@ class Character_info:
         self.anten_stop = para(1)
         self.motion = para(4)
 
-        self.last_motion = 0
+        self.last_f_count = 0
         self.active = 0
         self.last_on_right = 0
         
@@ -162,3 +164,4 @@ reset_flag = 0
 debug_flag = False
 save_slot = 0
 use_arrows = False
+short_mode = False

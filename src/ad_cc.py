@@ -73,6 +73,7 @@ for n in P_info:
     n.gg.ad =           loop_address + 0xC4
     n.gq.ad =           loop_address + 0xD8
     n.circuit.ad =      loop_address + 0xE0
+    n.f_count.ad =      loop_address + 0xF0
     
     #Movement
     n.x_pos.ad =        loop_address + 0x108

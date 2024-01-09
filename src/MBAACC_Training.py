@@ -4,7 +4,7 @@ import time
 import keyboard
 import cfg_cc
 import ad_cc
-import save_cc
+import math
 
 import sub_cc
 ad = ad_cc
@@ -20,7 +20,7 @@ lock_input = False
 def setup():
     sub.ex_cmd_enable()
     sub.changeFontSize(7, 14)
-    os.system('mode con: cols=161 lines=12')
+    os.system(f'mode con: lines=12')
     os.system('cls')
     os.system('title MBAACC Training')
     print('\x1b[1;1H' + '\x1b[?25l')
@@ -64,7 +64,7 @@ def function_key():
             cfg.bar_offset -= 1
             cfg.last_key_time = time.perf_counter()
     
-    elif keyboard.is_pressed("left") and cfg.bar_offset < cfg.bar_num - 81 and cfg.use_arrows:
+    elif keyboard.is_pressed("left") and cfg.bar_offset < cfg.bar_num - (cfg.bar_range + 1) and cfg.use_arrows:
         if time.perf_counter() - cfg.last_key_time > 0.05:
             cfg.bar_offset += 1
             cfg.last_key_time = time.perf_counter()
@@ -72,7 +72,7 @@ def function_key():
     elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
         cfg.debug_flag = not cfg.debug_flag
         os.system('cls')
-        os.system(f'mode con: cols=161 lines={12 + 7 * cfg.debug_flag}')
+        os.system(f'mode con: lines={12 + 7 * cfg.debug_flag}')
         time.sleep(0.3)
     
     elif keyboard.is_pressed("1"):
@@ -99,6 +99,8 @@ def main_loop():
 
     while 1:
         time.sleep(0.001)
+
+        cfg.bar_range = math.floor((os.get_terminal_size()[0] - 1) / 2)
 
         # MODEチェック
         sub.mode_check()
