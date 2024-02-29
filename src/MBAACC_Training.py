@@ -20,7 +20,7 @@ lock_input = False
 def setup():
     sub.ex_cmd_enable()
     sub.changeFontSize(7, 14)
-    os.system(f'mode con: lines=12')
+    os.system(f'mode con: lines=11')
     os.system('cls')
     os.system('title MBAACC Training')
     print('\x1b[1;1H' + '\x1b[?25l')
@@ -53,37 +53,31 @@ def function_key():
     elif keyboard.is_pressed("F6") and is_saved[cfg.save_slot]:
         sub.situationReset()
 
-    elif keyboard.is_pressed("F7"):
-        if time.perf_counter() - cfg.last_key_time > 0.1:
-            cfg.use_arrows = not cfg.use_arrows
-            cfg.bar_offset = 0
-            cfg.last_key_time = time.perf_counter()
-
-    elif keyboard.is_pressed("right") and cfg.bar_offset > 0 and cfg.use_arrows:
+    elif keyboard.is_pressed("right") and keyboard.is_pressed("shift") and cfg.bar_offset > 0:
         if time.perf_counter() - cfg.last_key_time > 0.05:
             cfg.bar_offset -= 1
             cfg.last_key_time = time.perf_counter()
     
-    elif keyboard.is_pressed("left") and cfg.bar_offset < cfg.bar_num - (cfg.bar_range + 1) and cfg.use_arrows:
+    elif keyboard.is_pressed("left") and keyboard.is_pressed("shift") and cfg.bar_offset < cfg.bar_num - (cfg.bar_range + 1):
         if time.perf_counter() - cfg.last_key_time > 0.05:
             cfg.bar_offset += 1
             cfg.last_key_time = time.perf_counter()
 
-    elif (keyboard.is_pressed(",")) and (keyboard.is_pressed(".")):
+    elif keyboard.is_pressed("F7"):
         cfg.debug_flag = not cfg.debug_flag
         os.system('cls')
-        os.system(f'mode con: lines={12 + 7 * cfg.debug_flag}')
+        os.system(f'mode con: lines={11 + 7 * cfg.debug_flag}')
         time.sleep(0.3)
     
-    elif keyboard.is_pressed("1"):
+    elif keyboard.is_pressed("1") and keyboard.is_pressed("shift"):
         cfg.save_slot = 0
         save_to_load = 0
 
-    elif keyboard.is_pressed("2"):
+    elif keyboard.is_pressed("2") and keyboard.is_pressed("shift"):
         cfg.save_slot = 1
         save_to_load = 1
 
-    elif keyboard.is_pressed("3"):
+    elif keyboard.is_pressed("3") and keyboard.is_pressed("shift"):
         cfg.save_slot = 2
         save_to_load = 2
     

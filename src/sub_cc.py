@@ -667,27 +667,29 @@ def bar_add():
         else:
             num = f" {num}"
         
-        if ((n.button_input.num & 64) > 0):
+        if (n.button_input.num & 64) > 0:
             font = c_font
         elif button_pressed == 1:
             font = hit_stun
         else:
             font = DEF
         
-        if (n.on_right.num != n.last_on_right) and cfg.bar_num != 0:
-            font += "\x1b[4m"
+        side_switch = ""
+        if (n.on_right.num != n.last_on_right) and cfg.bar_num > 1:
+            side_switch = "\x1b[4m"
         
-        bar4 += font + num[0] + DEF
-        n.last_on_right = n.on_right.num
+        bar4 += font + side_switch + num[0] + DEF
         
-        if ((n.button_input.num & 128) > 0):
+        if (n.button_input.num & 128) > 0:
             font = d_font
         elif button_pressed == 1:
             font = hit_stun
         else:
             font = DEF
-        bar4 += font + num[1] + DEF
+        bar4 += font + side_switch + num[1] + DEF
         n.barlist_4[cfg.bar_num] = bar4
+        
+        n.last_on_right = n.on_right.num
         num = ""
         font = ""
         
@@ -696,7 +698,7 @@ def bar_add():
         count = 0
         
         for o in cfg.A_info:
-            if o.owner.num == player_num and o.atk_st_pointer.num != 0 and o.exist.num == 1 and o.pattern.num != n.pattern.num:
+            if o.owner.num == player_num and o.atk_st_pointer.num != 0 and o.exist.num == 1 and o.pattern.num not in range(0, 10):
                 font = atk
                 count += 1
                 if cfg.stop.num != 0 and cfg.debug_flag == 1:
@@ -748,6 +750,7 @@ def bar_ini():
 
 def view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
+    CLEAR = '\x1b[0m' + '\x1b[K'
     
     column_headers = "\x1b[4m"
     for i in range(1, cfg.bar_range+1):
@@ -827,59 +830,60 @@ def view():
     f2 = f'\x1b[7m[F2]save {cfg.save_slot+1}\x1b[27m ' if keyboard.is_pressed("F2") else f'[F2]save {cfg.save_slot+1} '
     f6 = f'\x1b[7m[F6]load {cfg.save_slot+1}\x1b[27m' if keyboard.is_pressed("F6") else f'[F6]load {cfg.save_slot+1}'
 
-    p1_str = '\x1b[?25l'
-    p2_str = '\x1b[?25l'
-    ex_str = '\x1b[?25l'
+    p1_info = '\x1b[?25l'
+    p2_info = '\x1b[?25l'
+    ex_info = '\x1b[?25l'
 
     state_str = '\x1b[1;1H' + '\x1b[?25l'
 
-    p1_str += f'{font1}({x_p1:6}, {y_p1:6})' if cfg.bar_range >= 8 else ''
-    p1_str += f'{font2}({xp_p1:4}, {yp_p1:4})' if cfg.bar_range >= 14 else ''
-    p1_str += f'{font1}pat {pat1:3} [{st1:2}]' if cfg.bar_range >= 20 else ''
-    p1_str += f'{font2}x-spd {xspdfinal_p1:5}' if cfg.bar_range >= 26 else ''
-    p1_str += f'{font1}x-acc {xacc_p1:5}' if cfg.bar_range >= 31 else ''
-    p1_str += f'{font2}y-spd {yspd_p1:5}' if cfg.bar_range >= 37 else ''
-    p1_str += f'{font1}y-acc {yacc_p1:5}' if cfg.bar_range >= 42 else ''
-    p1_str += f'{font2}hp {health_p1:5}' if cfg.bar_range >= 46 else ''
-    p1_str += f'{font1}mc {circuit_p1:5}' if cfg.bar_range >= 50 else ''
-    p1_str += f'   {font3}{f1} {f2} {f6}' if cfg.bar_range >= 68 else ''
+    p1_info += f'{font1}({x_p1:6}, {y_p1:6})' if cfg.bar_range >= 8 else ''
+    p1_info += f'{font2}({xp_p1:4}, {yp_p1:4})' if cfg.bar_range >= 14 else ''
+    p1_info += f'{font1}pat {pat1:3} [{st1:2}]' if cfg.bar_range >= 20 else ''
+    p1_info += f'{font2}x-spd {xspdfinal_p1:5}' if cfg.bar_range >= 26 else ''
+    p1_info += f'{font1}x-acc {xacc_p1:5}' if cfg.bar_range >= 31 else ''
+    p1_info += f'{font2}y-spd {yspd_p1:5}' if cfg.bar_range >= 37 else ''
+    p1_info += f'{font1}y-acc {yacc_p1:5}' if cfg.bar_range >= 42 else ''
+    p1_info += f'{font2}hp {health_p1:5}' if cfg.bar_range >= 46 else ''
+    p1_info += f'{font1}mc {circuit_p1:5}' if cfg.bar_range >= 50 else ''
+    p1_info += f'   {font3}{f1} {f2} {f6}' if cfg.bar_range >= 68 else ''
 
-    debughotkeys = '\x1b[7m[,.]extra\x1b[27m' if keyboard.is_pressed(",") and keyboard.is_pressed(".") else '[,.]extra'
-    toggle_arrows = '\x1b[7m[F7]use <->\x1b[27m' if cfg.use_arrows else '[F7]use <->'
+    debughotkeys = '\x1b[7m[F7]extra\x1b[27m' if keyboard.is_pressed("F7") else '[F7]extra'
 
-    p2_str += f'{font1}({x_p2:6}, {y_p2:6})' if cfg.bar_range >= 8 else ''
-    p2_str += f'{font2}({xp_p2:4}, {yp_p2:4})' if cfg.bar_range >= 14 else ''
-    p2_str += f'{font1}pat {pat2:3} [{st2:2}]' if cfg.bar_range >= 20 else ''
-    p2_str += f'{font2}x-spd {xspdfinal_p2:5}' if cfg.bar_range >= 26 else ''
-    p2_str += f'{font1}x-acc {xacc_p2:5}' if cfg.bar_range >= 31 else ''
-    p2_str += f'{font2}y-spd {yspd_p2:5}' if cfg.bar_range >= 37 else ''
-    p2_str += f'{font1}y-acc {yacc_p2:5}' if cfg.bar_range >= 42 else ''
-    p2_str += f'{font2}hp {health_p2:5}' if cfg.bar_range >= 46 else ''
-    p2_str += f'{font1}mc {circuit_p2:5}' if cfg.bar_range >= 50 else ''
-    p2_str += f'   {font3}{debughotkeys} {toggle_arrows}' if cfg.bar_range >= 68 else ''
+    p2_info += f'{font1}({x_p2:6}, {y_p2:6})' if cfg.bar_range >= 8 else ''
+    p2_info += f'{font2}({xp_p2:4}, {yp_p2:4})' if cfg.bar_range >= 14 else ''
+    p2_info += f'{font1}pat {pat2:3} [{st2:2}]' if cfg.bar_range >= 20 else ''
+    p2_info += f'{font2}x-spd {xspdfinal_p2:5}' if cfg.bar_range >= 26 else ''
+    p2_info += f'{font1}x-acc {xacc_p2:5}' if cfg.bar_range >= 31 else ''
+    p2_info += f'{font2}y-spd {yspd_p2:5}' if cfg.bar_range >= 37 else ''
+    p2_info += f'{font1}y-acc {yacc_p2:5}' if cfg.bar_range >= 42 else ''
+    p2_info += f'{font2}hp {health_p2:5}' if cfg.bar_range >= 46 else ''
+    p2_info += f'{font1}mc {circuit_p2:5}' if cfg.bar_range >= 50 else ''
+    p2_info += f'   {font3}{debughotkeys}' if cfg.bar_range >= 68 else ''
 
-    ex_str += f'({dx:6}, {dy:6})' if cfg.bar_range > 8 else ''
-    ex_str += f'{font2}({dpx:4}, {dpy:4})' if cfg.bar_range > 14 else ''
+    ex_info += f'({dx:6}, {dy:6})' if cfg.bar_range >= 8 else ''
+    ex_info += f'{font2}({dpx:4}, {dpy:4})' if cfg.bar_range >= 14 else ''
 
-    state_str += p1_str + END
-    state_str += p2_str + END
-    state_str += ex_str + END
+
+    state_str += p1_info + END
+    state_str += p2_info + END
+    state_str += ex_info + END
     state_str += column_headers + END
     state_str += cfg.p1.Bar_1 + END
     state_str += cfg.p1.Bar_2 + END
     state_str += cfg.p1.Bar_5 + END
     state_str += cfg.p2.Bar_1 + END
     state_str += cfg.p2.Bar_2 + END
-    state_str += cfg.p2.Bar_5 + END
+    state_str += cfg.p2.Bar_5 + CLEAR
 
     if cfg.debug_flag == 1:
-        state_str += debug_view()
-
+        state_str += END + debug_view()
+        
     print(state_str)
 
 
 def debug_view():
     END = '\x1b[0m' + '\x1b[49m' + '\x1b[K' + '\x1b[1E'
+    CLEAR = '\x1b[0m' + '\x1b[K'
 
     column_headers = "\x1b[4m"
     for i in range(1, cfg.bar_range+1):
@@ -957,7 +961,7 @@ def debug_view():
     state_str += cfg.p1.Bar_3 + END
     state_str += cfg.p1.Bar_4 + END
     state_str += cfg.p2.Bar_3 + END
-    state_str += cfg.p2.Bar_4 + END
+    state_str += cfg.p2.Bar_4 + CLEAR
     
 
     return state_str

@@ -163,5 +163,3 @@ interval_time = 0
 reset_flag = 0
 debug_flag = False
 save_slot = 0
-use_arrows = False
-short_mode = False
