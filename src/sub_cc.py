@@ -888,9 +888,9 @@ def debug_view():
     column_headers = "\x1b[4m"
     for i in range(1, cfg.bar_range+1):
         if i % 10 != 0:
-            column_headers += f"\x1b[0;4m {i % 10}"
+            column_headers += f"\x1b[0;4m {i%10}"
         else:
-            column_headers += f"\x1b[4;48;5;238m{i}"
+            column_headers += f"\x1b[4;48;5;238m{i%100:2}"
 
     debug_str_3 = column_headers
 
