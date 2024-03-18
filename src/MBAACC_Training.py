@@ -25,6 +25,8 @@ def setup():
     os.system('title MBAACC Training')
     print('\x1b[1;1H' + '\x1b[?25l')
     windll.winmm.timeBeginPeriod(1)
+    sub.get_base_address()
+    sub.disable_fn1()
 
 
 def function_key():
@@ -128,10 +130,6 @@ def main_loop():
                         sub.bar_ini()
 
         sub.view()
-
-
-sub.get_base_address()
-sub.disable_fn1()
 
 setup()
 main_loop()

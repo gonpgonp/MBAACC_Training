@@ -52,13 +52,13 @@ def get_pid():
 
 def get_base_address():
     cfg.pid = 0
+    os.system("cls")
     while cfg.pid == 0:
         dict_pids = get_pid()
         try:
             cfg.pid = dict_pids["MBAA.exe"]
         except:
-            os.system('cls')
-            print("Waiting for MBAA to start")
+            print("\x1b[1;1HWaiting for MBAA to start")
             time.sleep(0.2)
 
     cfg.h_pro = OpenProcess(0x1F0FFF, False, cfg.pid)
@@ -137,10 +137,14 @@ def para_set(obj):
 
 def ex_cmd_enable():
     INVALID_HANDLE_VALUE = -1
+    STD_INPUT_HANDLE = -10
     STD_OUTPUT_HANDLE = -11
+    STD_ERROR_HANDLE = -12
     ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+    ENABLE_LVB_GRID_WORLDWIDE = 0x0010
 
     hOut = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+    hIn = windll.kernel32.GetStdHandle(STD_INPUT_HANDLE)
     if hOut == INVALID_HANDLE_VALUE:
         return False
     dwMode = wintypes.DWORD()
@@ -148,6 +152,8 @@ def ex_cmd_enable():
         return False
     dwMode.value |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
     if windll.kernel32.SetConsoleMode(hOut, dwMode) == 0:
+        return False
+    if windll.kernel32.SetConsoleMode(hIn, 128) == 0:
         return False
     return True
 
