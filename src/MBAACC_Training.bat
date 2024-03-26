@@ -1,2 +1,2 @@
-MBAACC_Training.py
+python MBAACC_Training.py
 pause

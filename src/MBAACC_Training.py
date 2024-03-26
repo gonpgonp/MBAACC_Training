@@ -60,7 +60,7 @@ def function_key():
             cfg.bar_offset -= 1
             cfg.last_key_time = time.perf_counter()
     
-    elif keyboard.is_pressed("left") and keyboard.is_pressed("shift") and cfg.bar_offset < cfg.bar_num - (cfg.bar_range + 1):
+    elif keyboard.is_pressed("left") and keyboard.is_pressed("shift") and cfg.bar_offset < min(cfg.bar_num, 400) - (cfg.bar_range + 1):
         if time.perf_counter() - cfg.last_key_time > 0.05:
             cfg.bar_offset += 1
             cfg.last_key_time = time.perf_counter()

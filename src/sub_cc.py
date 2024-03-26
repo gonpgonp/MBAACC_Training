@@ -142,18 +142,24 @@ def ex_cmd_enable():
     STD_ERROR_HANDLE = -12
     ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
     ENABLE_LVB_GRID_WORLDWIDE = 0x0010
+    ENABLE_QUICK_EDIT_MODE = 0x0040
 
     hOut = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
     hIn = windll.kernel32.GetStdHandle(STD_INPUT_HANDLE)
     if hOut == INVALID_HANDLE_VALUE:
         return False
+    if hIn == INVALID_HANDLE_VALUE:
+        return False
+        
     dwMode = wintypes.DWORD()
     if windll.kernel32.GetConsoleMode(hOut, byref(dwMode)) == 0:
         return False
     dwMode.value |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
     if windll.kernel32.SetConsoleMode(hOut, dwMode) == 0:
         return False
-    if windll.kernel32.SetConsoleMode(hIn, 128) == 0:
+
+    dwMode.value = 128
+    if windll.kernel32.SetConsoleMode(hIn, dwMode) == 0:
         return False
     return True
 
@@ -410,15 +416,7 @@ def view_st():
             barcheck = cfg.anten == 0 and cfg.hitstop <= 1
         
         if barcheck:
-            if cfg.bar_num < cfg.mem_range - 1:
-                cfg.bar_num += 1
-            if cfg.bar_num == cfg.mem_range - 1:
-                for m in cfg.p_info:
-                    m.barlist_1 = m.barlist_1[1:] + [""]
-                    m.barlist_2 = m.barlist_2[1:] + [""]
-                    m.barlist_3 = m.barlist_3[1:] + [""]
-                    m.barlist_4 = m.barlist_4[1:] + [""]
-                    m.barlist_5 = m.barlist_5[1:] + [""]
+            cfg.bar_num += 1
 
         # バー追加処理
         bar_add()
@@ -606,7 +604,7 @@ def bar_add():
         elif cfg.p1.anten_stop.num != 0 or cfg.p2.anten_stop.num != 0:
             font = freeze2
 
-        n.barlist_1[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        n.barlist_1[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
         font = ""
         num = ""
 
@@ -626,7 +624,7 @@ def bar_add():
                 font = hit_stop
 
 
-        n.barlist_2[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        n.barlist_2[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
         num = ""
         font = ""
         
@@ -656,7 +654,7 @@ def bar_add():
         else:
             font = DEF
         bar3 += font + num[1] + DEF
-        n.barlist_3[cfg.bar_num] = bar3
+        n.barlist_3[cfg.bar_num%400] = bar3
 
         #Bar 4
         bar4 = ""
@@ -693,7 +691,7 @@ def bar_add():
         else:
             font = DEF
         bar4 += font + side_switch + num[1] + DEF
-        n.barlist_4[cfg.bar_num] = bar4
+        n.barlist_4[cfg.bar_num%400] = bar4
         
         n.last_on_right = n.on_right.num
         num = ""
@@ -722,7 +720,7 @@ def bar_add():
                 font = partner_atk
                 num = str(cfg.p_info[player_num + 2].active)
         
-        n.barlist_5[cfg.bar_num] = font + num.rjust(2, " ")[-2:] + DEF
+        n.barlist_5[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
         num = ""
         font = ""
         
@@ -805,6 +803,8 @@ def view():
     dpx = abs(math.floor(cfg.p1.x_pos.num/128) - math.floor(cfg.p2.x_pos.num/128))
     dy = abs(cfg.p1.y_pos.num - cfg.p2.y_pos.num)
     dpy = abs(math.floor(cfg.p1.y_pos.num/128) - math.floor(cfg.p2.y_pos.num/128))
+    
+    adv = cfg.p1_adv%100 - cfg.p2_adv%100
 
     for n in cfg.p_info:
         n.Bar_1 = ""
@@ -813,14 +813,10 @@ def view():
         n.Bar_4 = ""
         n.Bar_5 = ""
 
-    if cfg.bar_num < cfg.bar_range:
-        start = 0
-    else:
-        start = cfg.bar_num - (cfg.bar_range - 1) - cfg.bar_offset
+    r = cfg.bar_num % 400 - cfg.bar_offset
+    l = r - cfg.bar_range
     
-    r = range(start, start + cfg.bar_range)
-
-    for n in r:
+    for n in range(l, r):
         for m in cfg.p_info:
             m.Bar_1 += m.barlist_1[n]
             m.Bar_2 += m.barlist_2[n]
@@ -868,6 +864,7 @@ def view():
 
     ex_info += f'({dx:6}, {dy:6})' if cfg.bar_range >= 8 else ''
     ex_info += f'{font2}({dpx:4}, {dpy:4})' if cfg.bar_range >= 14 else ''
+    ex_info += f'{font1}adv {adv:3}' if cfg.bar_range >= 18 else ''
 
 
     state_str += p1_info + END
