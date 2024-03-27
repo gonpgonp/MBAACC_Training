@@ -822,7 +822,7 @@ def view():
         n.Bar_4 = ""
         n.Bar_5 = ""
 
-    r = cfg.bar_num % 400 - cfg.bar_offset
+    r = cfg.bar_num % 400 - cfg.bar_offset + 1
     l = r - cfg.bar_range
     
     for n in range(l, r):
