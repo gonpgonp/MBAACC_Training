@@ -75,6 +75,7 @@ class Character_info:
         self.last_f_count = 0
         self.active = 0
         self.last_on_right = 0
+        self.last_motion = 0
         
         self.Bar_1 = ''
         self.Bar_2 = ''

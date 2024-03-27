@@ -372,8 +372,6 @@ def sitWrite(n):
 
 
 def view_st():
-    advantage_calc()
-    
     is_input = (cfg.p1.raw_dinput.num != 0 or cfg.p2.raw_dinput.num != 0 or
     cfg.p1.button_input.num != 0 or cfg.p2.button_input.num != 0 or
     cfg.p1.macro_input.num != 0 or cfg.p2.macro_input.num != 0)
@@ -420,6 +418,7 @@ def view_st():
 
         # バー追加処理
         bar_add()
+        advantage_calc()
 
         for n in cfg.p_info:
             n.last_f_count = n.f_count.num
@@ -517,6 +516,7 @@ def bar_add():
     freeze =        get_font((255, 255, 255), ( 60,  60,  60))
     freeze2 =       get_font((255, 255, 255), ( 120, 80, 160))
     hit_stop =      get_font((255, 255, 255), ( 60,  80, 128))
+    n_frame =       get_font((255, 255, 255), ( 110,  70, 30))
 
     hit_number = [
         26,  # 立吹っ飛び
@@ -574,15 +574,21 @@ def bar_add():
 
         elif n.motion.num == 0:
             num = str(n.pattern.num)
+           
             font = fre
-
-            if cfg.adv_flag == 1:
+            
+            if n.motion.num != n.last_motion:
+                font = n_frame
+                num = "N"
+            elif cfg.adv_flag == 1:
                 if player_num == 0:
                     font = adv
                     num = str(cfg.p1_adv)
                 elif player_num == 1:
                     font = adv
                     num = str(cfg.p2_adv)
+                    
+            
 
         if n.pattern.num == 350:  # 投げやられ
             font = thrown
@@ -605,6 +611,8 @@ def bar_add():
             font = freeze2
 
         n.barlist_1[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
+        
+        n.last_motion = n.motion.num
         font = ""
         num = ""
 
@@ -730,6 +738,7 @@ def bar_add():
 def bar_ini():
 
     cfg.reset_flag = 1
+    cfg.adv_flag = 0
 
     for n in cfg.p_info:
         n.Bar_1 = ""
@@ -737,6 +746,9 @@ def bar_ini():
         n.Bar_3 = ""
         n.Bar_4 = ""
         n.Bar_5 = ""
+        
+        n.last_f_count = 0
+        n.last_motion = 0
 
     cfg.bar_num = 0
     cfg.interval = 0
