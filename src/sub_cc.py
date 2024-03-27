@@ -372,6 +372,8 @@ def sitWrite(n):
 
 
 def view_st():
+    advantage_calc()
+
     is_input = (cfg.p1.raw_dinput.num != 0 or cfg.p2.raw_dinput.num != 0 or
     cfg.p1.button_input.num != 0 or cfg.p2.button_input.num != 0 or
     cfg.p1.macro_input.num != 0 or cfg.p2.macro_input.num != 0)
@@ -418,10 +420,11 @@ def view_st():
 
         # バー追加処理
         bar_add()
-        advantage_calc()
 
         for n in cfg.p_info:
             n.last_f_count = n.f_count.num
+            n.last_motion = n.motion.num
+            n.last_on_right = n.on_right.num
 
 def advantage_calc():
     if cfg.p1.motion.num == 0 and cfg.p2.motion.num == 0:
@@ -435,7 +438,7 @@ def advantage_calc():
     if cfg.adv_flag == 1:
         # 有利フレーム検証
         if (cfg.p1.motion.num == 0 and cfg.p2.motion.num != 0 and
-                cfg.stop.num == 0 and cfg.p1.last_f_count != cfg.p2.f_count.num):
+                cfg.stop.num == 0 and cfg.p1.last_f_count != cfg.p1.f_count.num):
             cfg.p1_adv += 1
 
         # 不利フレーム検証
@@ -574,22 +577,18 @@ def bar_add():
 
         elif n.motion.num == 0:
             num = str(n.pattern.num)
-           
             font = fre
             
-            if n.motion.num != n.last_motion:
-                font = n_frame
-                num = "N"
-            elif cfg.adv_flag == 1:
+            if cfg.adv_flag == 1:
                 if player_num == 0:
                     font = adv
                     num = str(cfg.p1_adv)
                 elif player_num == 1:
                     font = adv
                     num = str(cfg.p2_adv)
+            if n.motion.num != n.last_motion:
+                font = n_frame
                     
-            
-
         if n.pattern.num == 350:  # 投げやられ
             font = thrown
             num = "T"
@@ -612,7 +611,6 @@ def bar_add():
 
         n.barlist_1[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
         
-        n.last_motion = n.motion.num
         font = ""
         num = ""
 
@@ -701,7 +699,6 @@ def bar_add():
         bar4 += font + side_switch + num[1] + DEF
         n.barlist_4[cfg.bar_num%400] = bar4
         
-        n.last_on_right = n.on_right.num
         num = ""
         font = ""
         
