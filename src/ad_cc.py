@@ -22,7 +22,6 @@ cfg.stop.ad = ANTEN_STOP_AD = 0x162A48  # 全体停止
 cfg.game_mode.ad = GAME_MODE_AD = 0x14EEE8
 
 TRAINING_PAUSE_AD = 0x162A64  # メニュー画面開いているとき
-MAX_DAMAGE_AD = 0x157E0C
 CIRCUIT_POSITION = 0x15DEF0
 RESET_AD = 0x15DEC3  # リセット FF
 

@@ -66,6 +66,7 @@ class Character_info:
         self.anim_box = para(1)
         self.st_sac = para(1)
         self.st_invuln = para(1)
+        self.st_flagset2 = para(4)
         
         #Addresses outside of character
         self.tag_flag = para(1)
@@ -164,3 +165,8 @@ interval_time = 0
 reset_flag = 0
 debug_flag = False
 save_slot = 0
+
+num_saves = 3
+is_saved = [False] * num_saves
+save_to_load = 0
+lock_input = False

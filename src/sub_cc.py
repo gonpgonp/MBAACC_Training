@@ -164,64 +164,6 @@ def ex_cmd_enable():
     return True
 
 
-def changeFontSize(size_x, size_y):  # Changes the font size to *size* pixels (kind of, but not really. You'll have to try it to chack if it works for your purpose ;) )
-    from ctypes import POINTER, WinDLL, Structure, sizeof, byref
-    from ctypes.wintypes import BOOL, SHORT, WCHAR, UINT, ULONG, DWORD, HANDLE
-
-    LF_FACESIZE = 32
-    STD_OUTPUT_HANDLE = -11
-
-    class COORD(Structure):
-        _fields_ = [
-            ("X", SHORT),
-            ("Y", SHORT),
-        ]
-
-    class CONSOLE_FONT_INFOEX(Structure):
-        _fields_ = [
-            ("cbSize", ULONG),
-            ("nFont", DWORD),
-            ("dwFontSize", COORD),
-            ("FontFamily", UINT),
-            ("FontWeight", UINT),
-            ("FaceName", WCHAR * LF_FACESIZE),
-        ]
-
-    kernel32_dll = WinDLL("kernel32.dll")
-
-    get_last_error_func = kernel32_dll.GetLastError
-    get_last_error_func.argtypes = []
-    get_last_error_func.restype = DWORD
-
-    get_std_handle_func = kernel32_dll.GetStdHandle
-    get_std_handle_func.argtypes = [DWORD]
-    get_std_handle_func.restype = HANDLE
-
-    get_current_console_font_ex_func = kernel32_dll.GetCurrentConsoleFontEx
-    get_current_console_font_ex_func.argtypes = [
-        HANDLE,
-        BOOL,
-        POINTER(CONSOLE_FONT_INFOEX),
-    ]
-    get_current_console_font_ex_func.restype = BOOL
-
-    set_current_console_font_ex_func = kernel32_dll.SetCurrentConsoleFontEx
-    set_current_console_font_ex_func.argtypes = [
-        HANDLE,
-        BOOL,
-        POINTER(CONSOLE_FONT_INFOEX),
-    ]
-    set_current_console_font_ex_func.restype = BOOL
-
-    stdout = get_std_handle_func(STD_OUTPUT_HANDLE)
-    font = CONSOLE_FONT_INFOEX()
-    font.cbSize = sizeof(CONSOLE_FONT_INFOEX)
-
-    font.dwFontSize.X = size_x
-    font.dwFontSize.Y = size_y
-
-    set_current_console_font_ex_func(stdout, False, byref(font))
-
 def situationCheck():
     # 状況チェック
     para_get(cfg.fn1_key)
@@ -277,9 +219,10 @@ def situationCheck():
         
         #Pointer Children
         pointer_get(n.st_pointer, n.anim_st_pointer, 0x38)
+        pointer_get(n.anim_box, n.anim_st_pointer, 0x42)
         pointer_get(n.st_sac, n.st_pointer, 0xC)
         pointer_get(n.st_invuln, n.st_pointer, 0xD)
-        pointer_get(n.anim_box, n.anim_st_pointer, 0x42)
+        pointer_get(n.st_flagset2, n.st_pointer, 0x18)
 
         #Addresses outside of character
         para_get(n.tag_flag)
@@ -382,6 +325,7 @@ def view_st():
     if (cfg.p1.motion.num != 0 or cfg.p1.hitstop.num != 0 or
             cfg.p2.motion.num != 0 or cfg.p2.hitstop.num != 0 or
             cfg.p3.atk_st_pointer.num != 0 or cfg.p4.atk_st_pointer.num != 0 or
+            cfg.p1.st_flagset2.num != 0 or cfg.p2.st_flagset2.num != 0 or
             cfg.debug_flag == 1 and is_input):
         cfg.reset_flag = 0
         cfg.bar_flag = 1
@@ -520,6 +464,8 @@ def bar_add():
     freeze2 =       get_font((255, 255, 255), ( 120, 80, 160))
     hit_stop =      get_font((255, 255, 255), ( 60,  80, 128))
     n_frame =       get_font((255, 255, 255), ( 110,  70, 30))
+    no_block =      get_font((255, 255, 255), ( 65, 130,   0))
+    n_frame_nb =    get_font((255, 255, 255), ( 80, 90,   30))
 
     hit_number = [
         26,  # 立吹っ飛び
@@ -586,8 +532,12 @@ def bar_add():
                 elif player_num == 1:
                     font = adv
                     num = str(cfg.p2_adv)
+            if n.st_flagset2.num & 0x80000000:
+                font = no_block
             if n.motion.num != n.last_motion:
                 font = n_frame
+                if n.st_flagset2.num & 0x80000000:
+                    font = n_frame_nb
                     
         if n.pattern.num == 350:  # 投げやられ
             font = thrown
@@ -628,7 +578,6 @@ def bar_add():
                 font = freeze
             elif n.hitstop.num != 0:
                 font = hit_stop
-
 
         n.barlist_2[cfg.bar_num%400] = font + num.rjust(2, " ")[-2:] + DEF
         num = ""
@@ -845,47 +794,50 @@ def view():
     p2_info = '\x1b[?25l'
     ex_info = '\x1b[?25l'
 
-    state_str = '\x1b[1;1H' + '\x1b[?25l'
+    state_str = '\x1b[1;1H\x1b[?25l'
 
-    p1_info += f'{font1}({x_p1:6}, {y_p1:6})' if cfg.bar_range >= 8 else ''
-    p1_info += f'{font2}({xp_p1:4}, {yp_p1:4})' if cfg.bar_range >= 14 else ''
-    p1_info += f'{font1}pat {pat1:3} [{st1:2}]' if cfg.bar_range >= 20 else ''
-    p1_info += f'{font2}x-spd {xspdfinal_p1:5}' if cfg.bar_range >= 26 else ''
-    p1_info += f'{font1}x-acc {xacc_p1:5}' if cfg.bar_range >= 31 else ''
-    p1_info += f'{font2}y-spd {yspd_p1:5}' if cfg.bar_range >= 37 else ''
-    p1_info += f'{font1}y-acc {yacc_p1:5}' if cfg.bar_range >= 42 else ''
-    p1_info += f'{font2}hp {health_p1:5}' if cfg.bar_range >= 46 else ''
-    p1_info += f'{font1}mc {circuit_p1:5}' if cfg.bar_range >= 50 else ''
-    p1_info += f'   {font3}{f1} {f2} {f6}' if cfg.bar_range >= 68 else ''
+    p1_info += f'{font1}({x_p1:6}, {y_p1:6})'
+    p1_info += f'{font2}({xp_p1:4}, {yp_p1:4})'
+    p1_info += f'{font1}pat {pat1:3} [{st1:2}]'
+    p1_info += f'{font2}x-spd {xspdfinal_p1:5}'
+    p1_info += f'{font1}x-acc {xacc_p1:5}'
+    p1_info += f'{font2}y-spd {yspd_p1:5}'
+    p1_info += f'{font1}y-acc {yacc_p1:5}'
+    p1_info += f'{font2}hp {health_p1:5}'
+    p1_info += f'{font1}mc {circuit_p1:5}'
+    p1_info += f'   {font3}{f1} {f2} {f6}'
+    p1_info += f'{CLEAR}\x1b[1;{cfg.bar_range*2+1}H{CLEAR}'
 
     debughotkeys = '\x1b[7m[F7]extra\x1b[27m' if keyboard.is_pressed("F7") else '[F7]extra'
 
-    p2_info += f'{font1}({x_p2:6}, {y_p2:6})' if cfg.bar_range >= 8 else ''
-    p2_info += f'{font2}({xp_p2:4}, {yp_p2:4})' if cfg.bar_range >= 14 else ''
-    p2_info += f'{font1}pat {pat2:3} [{st2:2}]' if cfg.bar_range >= 20 else ''
-    p2_info += f'{font2}x-spd {xspdfinal_p2:5}' if cfg.bar_range >= 26 else ''
-    p2_info += f'{font1}x-acc {xacc_p2:5}' if cfg.bar_range >= 31 else ''
-    p2_info += f'{font2}y-spd {yspd_p2:5}' if cfg.bar_range >= 37 else ''
-    p2_info += f'{font1}y-acc {yacc_p2:5}' if cfg.bar_range >= 42 else ''
-    p2_info += f'{font2}hp {health_p2:5}' if cfg.bar_range >= 46 else ''
-    p2_info += f'{font1}mc {circuit_p2:5}' if cfg.bar_range >= 50 else ''
-    p2_info += f'   {font3}{debughotkeys}' if cfg.bar_range >= 68 else ''
+    p2_info += f'{font1}({x_p2:6}, {y_p2:6})'
+    p2_info += f'{font2}({xp_p2:4}, {yp_p2:4})'
+    p2_info += f'{font1}pat {pat2:3} [{st2:2}]'
+    p2_info += f'{font2}x-spd {xspdfinal_p2:5}'
+    p2_info += f'{font1}x-acc {xacc_p2:5}'
+    p2_info += f'{font2}y-spd {yspd_p2:5}'
+    p2_info += f'{font1}y-acc {yacc_p2:5}'
+    p2_info += f'{font2}hp {health_p2:5}'
+    p2_info += f'{font1}mc {circuit_p2:5}'
+    p2_info += f'   {font3}{debughotkeys}'
+    p2_info += f'{CLEAR}\x1b[2;{cfg.bar_range*2+1}H{CLEAR}'
 
-    ex_info += f'({dx:6}, {dy:6})' if cfg.bar_range >= 8 else ''
-    ex_info += f'{font2}({dpx:4}, {dpy:4})' if cfg.bar_range >= 14 else ''
-    ex_info += f'{font1}adv {adv:3}' if cfg.bar_range >= 18 else ''
+    ex_info += f'({dx:6}, {dy:6})'
+    ex_info += f'{font2}({dpx:4}, {dpy:4})'
+    ex_info += f'{font1}adv {adv:3}'
+    ex_info += f'{CLEAR}\x1b[3;{cfg.bar_range*2+1}H{CLEAR}'
 
 
-    state_str += p1_info + END
-    state_str += p2_info + END
-    state_str += ex_info + END
-    state_str += column_headers + END
-    state_str += cfg.p1.Bar_1 + END
-    state_str += cfg.p1.Bar_2 + END
-    state_str += cfg.p1.Bar_5 + END
-    state_str += cfg.p2.Bar_1 + END
-    state_str += cfg.p2.Bar_2 + END
-    state_str += cfg.p2.Bar_5 + CLEAR
+    state_str += '\x1b[1;1H' + p1_info + END
+    state_str += '\x1b[2;1H' + p2_info + END
+    state_str += '\x1b[3;1H' + ex_info + END
+    state_str += '\x1b[4;1H' + column_headers + END
+    state_str += '\x1b[5;1H' + cfg.p1.Bar_1 + END
+    state_str += '\x1b[6;1H' + cfg.p1.Bar_2 + END
+    state_str += '\x1b[7;1H' + cfg.p1.Bar_5 + END
+    state_str += '\x1b[8;1H' + cfg.p2.Bar_1 + END
+    state_str += '\x1b[9;1H' + cfg.p2.Bar_2 + END
+    state_str += '\x1b[10;1H' + cfg.p2.Bar_5 + CLEAR
 
     if cfg.debug_flag == 1:
         state_str += END + debug_view()
@@ -903,8 +855,6 @@ def debug_view():
             column_headers += f"\x1b[0;4m {i%10}"
         else:
             column_headers += f"\x1b[4;48;5;238m{i%100:2}"
-
-    debug_str_3 = column_headers
 
     exflash_p1 = cfg.p1.anten_stop.num if cfg.p1.anten_stop.num > 0 else cfg.stop.num
     exflash_p2 = cfg.p2.anten_stop.num if cfg.p2.anten_stop.num > 0 else cfg.stop.num
@@ -949,31 +899,33 @@ def debug_view():
     font1 = "\x1b[0m"
     font2 = "\x1b[7m"
     
-    debug_str_p1 = f"ex {exflash_p1:3}" if cfg.bar_range >= 3 else ''
-    debug_str_p1 += f"{font2}ch {ch_p1}" if cfg.bar_range >= 5 else ''
-    debug_str_p1 += f"{font1}gg {gg_p1:5} [{gq_p1:.3f}]" if cfg.bar_range >= 13 else ''
-    debug_str_p1 += f"{font2}rhp {rhealth_p1:5}" if cfg.bar_range >= 18 else ''
-    debug_str_p1 += f"{font1}scaling {grav_hits_p1:2} [{gravity_p1:2},{extra_grav_p1:2}]" if cfg.bar_range >= 27 else ''
-    debug_str_p1 += f"{font2}partner {partner_mot_p1:3} [{partner_pf_p1:2}]" if cfg.bar_range >= 35 else ''
+    debug_str_p1 = '\x1b[?25l'
+    debug_str_p2 = '\x1b[?25l'
+    
+    debug_str_p1 += f"ex {exflash_p1:3}"
+    debug_str_p1 += f"{font2}ch {ch_p1}"
+    debug_str_p1 += f"{font1}gg {gg_p1:5} [{gq_p1:.3f}]"
+    debug_str_p1 += f"{font2}rhp {rhealth_p1:5}"
+    debug_str_p1 += f"{font1}scaling {grav_hits_p1:2} [{gravity_p1:2},{extra_grav_p1:2}]"
+    debug_str_p1 += f"{font2}partner {partner_mot_p1:3} [{partner_pf_p1:2}]"
+    debug_str_p1 += f'{CLEAR}\x1b[11;{cfg.bar_range*2+1}H{CLEAR}'
 
-    debug_str_p2 = f"ex {exflash_p2:3}" if cfg.bar_range >= 3 else ''
-    debug_str_p2 += f"{font2}ch {ch_p2}" if cfg.bar_range >= 5 else ''
-    debug_str_p2 += f"{font1}gg {gg_p2:5} [{gq_p2:.3f}]" if cfg.bar_range >= 13 else ''
-    debug_str_p2 += f"{font2}rhp {rhealth_p2:5}" if cfg.bar_range >= 18 else ''
-    debug_str_p2 += f"{font1}scaling {grav_hits_p2:2} [{gravity_p2:2},{extra_grav_p2:2}]" if cfg.bar_range >= 27 else ''
-    debug_str_p2 += f"{font2}partner {partner_mot_p2:3} [{partner_pf_p2:2}]" if cfg.bar_range >= 35 else ''
+    debug_str_p2 += f"ex {exflash_p2:3}"
+    debug_str_p2 += f"{font2}ch {ch_p2}"
+    debug_str_p2 += f"{font1}gg {gg_p2:5} [{gq_p2:.3f}]"
+    debug_str_p2 += f"{font2}rhp {rhealth_p2:5}"
+    debug_str_p2 += f"{font1}scaling {grav_hits_p2:2} [{gravity_p2:2},{extra_grav_p2:2}]"
+    debug_str_p2 += f"{font2}partner {partner_mot_p2:3} [{partner_pf_p2:2}]"
+    debug_str_p2 += f'{CLEAR}\x1b[12;{cfg.bar_range*2+1}H{CLEAR}'
 
     state_str = ""
-    state_str += debug_str_p1 + END
-    state_str += debug_str_p2 + END
-    state_str += "\x1b[4m"
-    state_str += debug_str_3 + END
-    state_str += "\x1b[0m"
-
-    state_str += cfg.p1.Bar_3 + END
-    state_str += cfg.p1.Bar_4 + END
-    state_str += cfg.p2.Bar_3 + END
-    state_str += cfg.p2.Bar_4 + CLEAR
+    state_str += '\x1b[11;1H' + debug_str_p1 + END
+    state_str += '\x1b[12;1H' + debug_str_p2 + END
+    state_str += '\x1b[13;1H' + column_headers + END
+    state_str += '\x1b[14;1H' + cfg.p1.Bar_3 + END
+    state_str += '\x1b[15;1H' + cfg.p1.Bar_4 + END
+    state_str += '\x1b[16;1H' + cfg.p2.Bar_3 + END
+    state_str += '\x1b[17;1H' + cfg.p2.Bar_4 + CLEAR
     
 
     return state_str
@@ -1003,10 +955,6 @@ def mode_check():
 
 def timer_check():
     cfg.f_timer = r_mem(ad.TIMER_AD, cfg.b_timer)
-
-
-def MAX_Damage_ini():
-    w_mem(ad.MAX_DAMAGE_AD, b'\x00\x00\x00\x00')
 
 
 def disable_fn1():
