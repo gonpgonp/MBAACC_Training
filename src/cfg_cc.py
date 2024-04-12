@@ -66,6 +66,7 @@ class Character_info:
         self.anim_box = para(1)
         self.st_sac = para(1)
         self.st_invuln = para(1)
+        self.st_cancels = para(2)
         self.st_flagset2 = para(4)
         
         #Addresses outside of character
@@ -163,7 +164,9 @@ hitstop = 0
 interval = 0
 interval_time = 0
 reset_flag = 0
-debug_flag = False
+info_setting = 0
+cancel_info = 0
+extra_info = 0
 save_slot = 0
 
 num_saves = 3

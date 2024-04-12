@@ -55,10 +55,12 @@ def function_key():
             cfg.last_key_time = time.perf_counter()
 
     elif keyboard.is_pressed("F7"):
-        cfg.debug_flag = not cfg.debug_flag
+        cfg.info_setting = (cfg.info_setting + 1) % 4
+        cfg.cancel_info = cfg.info_setting & 1
+        cfg.extra_info = cfg.info_setting & 2
         os.system('cls')
-        os.system(f'mode con: lines={11 + 7 * cfg.debug_flag}')
-        time.sleep(0.3)
+        os.system(f'mode con: lines={11 + 7 * cfg.extra_info}')
+        time.sleep(0.1)
     
     elif keyboard.is_pressed("1") and keyboard.is_pressed("shift"):
         cfg.save_slot = 0
