@@ -57,7 +57,7 @@ def function_key():
     elif keyboard.is_pressed("F7"):
         cfg.info_setting = (cfg.info_setting + 1) % 4
         cfg.cancel_info = cfg.info_setting & 1
-        cfg.extra_info = cfg.info_setting & 2
+        cfg.extra_info = (cfg.info_setting >> 1) & 1
         os.system('cls')
         os.system(f'mode con: lines={11 + 7 * cfg.extra_info}')
         time.sleep(0.1)
