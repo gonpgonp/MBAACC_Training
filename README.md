@@ -1,3 +1,5 @@
+### This fork is no longer being supported and has been integrated into Extended Training Mode https://github.com/fangdreth/MBAACC-Extended-Training-Mode
+
 # MBAACC_Training
 
 This is a fork of Training Tool made for Melty Blood Actress Again Current Code developed by Kosunan.
